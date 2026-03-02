@@ -1,0 +1,137 @@
+<?php use App\Core\Csrf; $isEdit = is_array($post); ?>
+<?php $selectedCategoryId = (int) ($post['categoria_id'] ?? 0); ?>
+<?php $statusLabels = ['draft' => 'Rascunho', 'published' => 'Publicado', 'scheduled' => 'Agendado']; ?>
+<section class="section-head">
+    <h1><?= $isEdit ? 'Editar Matéria #' . (int) $post['id'] : 'Nova Matéria' ?></h1>
+    <a class="btn-small" href="<?= e(url('/admin/posts')) ?>">Voltar</a>
+</section>
+
+<?php if ($placements): ?>
+<div class="alert alert-warning">
+    Fixada em:
+    <?php foreach ($placements as $p): ?>
+        <span><?= e($p['secao_titulo']) ?> (pos #<?= (int) $p['posicao'] ?>)</span>
+    <?php endforeach; ?>
+</div>
+<?php endif; ?>
+
+<form method="post" enctype="multipart/form-data" class="grid-form" action="<?= e($isEdit ? url('/admin/posts/' . $post['id'] . '/editar') : url('/admin/posts')) ?>">
+    <?= Csrf::field() ?>
+    <label>Título
+        <input type="text" name="titulo" maxlength="180" required value="<?= e((string) ($post['titulo'] ?? '')) ?>">
+    </label>
+    <label>Slug
+        <input type="text" name="slug" maxlength="190" value="<?= e((string) ($post['slug'] ?? '')) ?>">
+    </label>
+    <label>Subtítulo/Lead
+        <input type="text" name="subtitulo" maxlength="255" value="<?= e((string) ($post['subtitulo'] ?? '')) ?>">
+    </label>
+    <label>Categoria
+        <select name="categoria_id" required>
+            <?php foreach ($categories as $cat): ?>
+                <?php if (($cat['slug'] ?? '') === 'fofocas-rapidas') { continue; } ?>
+                <option value="<?= (int) $cat['id'] ?>" <?= $selectedCategoryId === (int) $cat['id'] ? 'selected' : '' ?>><?= e($cat['nome']) ?></option>
+            <?php endforeach; ?>
+        </select>
+    </label>
+    <label>Status
+        <select name="status">
+            <?php foreach (['draft','published','scheduled'] as $st): ?>
+                <option value="<?= $st ?>" <?= ($post['status'] ?? 'draft') === $st ? 'selected' : '' ?>><?= e($statusLabels[$st] ?? $st) ?></option>
+            <?php endforeach; ?>
+        </select>
+    </label>
+    <label>Publicado em
+        <input type="datetime-local" name="publicado_em" value="<?= !empty($post['publicado_em']) ? e(date('Y-m-d\TH:i', strtotime((string) $post['publicado_em']))) : '' ?>">
+    </label>
+    <label>Tags (csv)
+        <input type="text" name="tags" value="<?= e((string) ($post['tags'] ?? '')) ?>">
+    </label>
+    <label>Tempo leitura (min)
+        <input type="number" min="1" max="90" name="tempo_leitura" value="<?= (int) ($post['tempo_leitura'] ?? 3) ?>">
+    </label>
+    <label>Veracidade
+        <select name="verificacao">
+            <option value="rumor" <?= ($post['verificacao'] ?? 'rumor') === 'rumor' ? 'selected' : '' ?>>Rumor</option>
+            <option value="confirmado" <?= ($post['verificacao'] ?? 'rumor') === 'confirmado' ? 'selected' : '' ?>>Confirmado</option>
+        </select>
+    </label>
+    <label>Cor do título da chamada principal
+        <input type="color" name="overlay_titulo_cor" value="<?= e((string) ($post['overlay_titulo_cor'] ?? '#FFFFFF')) ?>">
+    </label>
+    <fieldset class="full feature-flags">
+        <legend>Destaques da mat&eacute;ria</legend>
+        <p class="muted">Ative os selos visuais que aparecem na mat&eacute;ria e nos cards.</p>
+
+        <label class="feature-item">
+            <input type="checkbox" name="is_breaking" value="1" <?= !empty($post['is_breaking']) ? 'checked' : '' ?>>
+            <span>
+                <strong>Breaking</strong>
+                <small class="muted">Use para not&iacute;cia urgente ou de grande impacto imediato.</small>
+            </span>
+        </label>
+
+        <label class="feature-item">
+            <input type="checkbox" name="is_exclusivo" value="1" <?= !empty($post['is_exclusivo']) ? 'checked' : '' ?>>
+            <span>
+                <strong>Exclusivo</strong>
+                <small class="muted">Use quando o conte&uacute;do foi apurado em primeira m&atilde;o pela equipe.</small>
+            </span>
+        </label>
+
+        <label class="feature-item">
+            <input type="checkbox" name="is_vip" value="1" <?= !empty($post['is_vip']) ? 'checked' : '' ?>>
+            <span>
+                <strong>VIP</strong>
+                <small class="muted">Use para pautas premium, celebridades ou conte&uacute;do de maior prest&iacute;gio.</small>
+            </span>
+        </label>
+    </fieldset>
+
+    <label>Evento - Data<input type="date" name="event_data" value="<?= e((string) ($post['event_data'] ?? '')) ?>"></label>
+    <label>Evento - Hora<input type="time" name="event_hora" value="<?= e((string) ($post['event_hora'] ?? '')) ?>"></label>
+    <label>Evento - Local<input type="text" name="event_local" value="<?= e((string) ($post['event_local'] ?? '')) ?>"></label>
+    <label>Evento - Bairro/Cidade<input type="text" name="event_bairro_cidade" value="<?= e((string) ($post['event_bairro_cidade'] ?? '')) ?>"></label>
+
+    <label class="full">Conteúdo
+        <textarea name="conteudo_html" rows="14" required><?= e((string) ($post['conteudo_html'] ?? '')) ?></textarea>
+    </label>
+
+    <label class="full">Imagem de capa
+        <input type="file" name="imagem_capa" accept=".jpg,.jpeg,.png,.webp">
+    </label>
+    <div class="full">
+        <div
+            id="coverPreviewCard"
+            class="cover-preview-card <?= empty($post['imagem_capa']) ? 'is-hidden' : '' ?>"
+            <?= !empty($post['imagem_capa']) ? 'data-original-src="' . e(url($post['imagem_capa'])) . '"' : '' ?>
+        >
+            <img
+                id="coverPreviewImage"
+                class="preview-cover"
+                src="<?= !empty($post['imagem_capa']) ? e(url($post['imagem_capa'])) : '' ?>"
+                alt="Prévia da capa"
+            >
+            <small class="muted">Prévia da imagem de capa (sem comentário).</small>
+        </div>
+    </div>
+
+    <div class="full">
+        <h3>Galeria (até 20)</h3>
+        <p class="muted">Ao selecionar arquivos, os cards com foto aparecem abaixo para adicionar comentário e ordenar.</p>
+        <div id="galleryList" class="admin-gallery-sort">
+            <?php foreach ($photos as $i => $photo): ?>
+                <div class="admin-gallery-item" draggable="true">
+                    <img src="<?= e(url($photo['arquivo'])) ?>" alt="">
+                    <input type="hidden" name="existing_fotos[]" value="<?= e($photo['arquivo']) ?>">
+                    <input type="hidden" name="existing_ordens[]" value="<?= (int) ($photo['ordem'] ?? $i) ?>" class="ordem-input">
+                    <input type="text" name="existing_legendas[]" placeholder="Comentário da foto" value="<?= e((string) $photo['legenda']) ?>">
+                    <button type="button" class="btn-danger remove-item">Remover</button>
+                </div>
+            <?php endforeach; ?>
+        </div>
+        <input type="file" id="galleryFiles" name="fotos[]" accept=".jpg,.jpeg,.png,.webp" multiple data-max-files="20" data-gallery-managed="1">
+        <small class="muted">Ordene arrastando os cards.</small>
+    </div>
+    <button type="submit" class="btn-primary full">Salvar Matéria</button>
+</form>

@@ -1,0 +1,132 @@
+<?php
+declare(strict_types=1);
+
+function config(string $key, mixed $default = null): mixed
+{
+    global $config;
+    $segments = explode('.', $key);
+    $value = $config;
+    foreach ($segments as $segment) {
+        if (!is_array($value) || !array_key_exists($segment, $value)) {
+            return $default;
+        }
+        $value = $value[$segment];
+    }
+    return $value;
+}
+
+function e(?string $value): string
+{
+    return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
+function url(string $path = ''): string
+{
+    return rtrim((string) config('app.url'), '/') . '/' . ltrim($path, '/');
+}
+
+function redirect(string $path): never
+{
+    header('Location: ' . (str_starts_with($path, 'http') ? $path : url($path)));
+    exit;
+}
+
+function now(): string
+{
+    return (new DateTimeImmutable())->format('Y-m-d H:i:s');
+}
+
+function old(string $key, mixed $default = ''): mixed
+{
+    return $_SESSION['_old'][$key] ?? $default;
+}
+
+function flash_old(array $input): void
+{
+    $_SESSION['_old'] = $input;
+}
+
+function clear_old(): void
+{
+    unset($_SESSION['_old']);
+}
+
+function is_post(): bool
+{
+    return ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST';
+}
+
+function collect_author_metadata(): array
+{
+    $sanitizeText = static function (?string $value, int $maxLen = 255): ?string {
+        $value = trim((string) $value);
+        if ($value === '') {
+            return null;
+        }
+        $value = preg_replace('/[\x00-\x1F\x7F]/u', '', $value) ?? '';
+        $value = mb_substr($value, 0, $maxLen);
+        return $value !== '' ? $value : null;
+    };
+
+    $sanitizeIp = static function (?string $ip) use ($sanitizeText): ?string {
+        $ip = $sanitizeText($ip, 45);
+        if ($ip === null) {
+            return null;
+        }
+        return filter_var($ip, FILTER_VALIDATE_IP) ? $ip : null;
+    };
+
+    $ipCandidates = [];
+    $cfIp = $sanitizeIp($_SERVER['HTTP_CF_CONNECTING_IP'] ?? null);
+    if ($cfIp !== null) {
+        $ipCandidates[] = $cfIp;
+    }
+    $trueClientIp = $sanitizeIp($_SERVER['HTTP_TRUE_CLIENT_IP'] ?? null);
+    if ($trueClientIp !== null) {
+        $ipCandidates[] = $trueClientIp;
+    }
+
+    $xffRaw = (string) ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? '');
+    if (trim($xffRaw) !== '') {
+        foreach (explode(',', $xffRaw) as $item) {
+            $ip = $sanitizeIp($item);
+            if ($ip !== null) {
+                $ipCandidates[] = $ip;
+            }
+        }
+    }
+
+    $clientIp = $sanitizeIp($_SERVER['HTTP_CLIENT_IP'] ?? null);
+    if ($clientIp !== null) {
+        $ipCandidates[] = $clientIp;
+    }
+
+    $remoteAddr = $sanitizeIp($_SERVER['REMOTE_ADDR'] ?? null);
+    if ($remoteAddr !== null) {
+        $ipCandidates[] = $remoteAddr;
+    }
+
+    $ipAddress = $ipCandidates[0] ?? null;
+    $userAgent = $sanitizeText($_SERVER['HTTP_USER_AGENT'] ?? null, 255);
+    $referer = $sanitizeText($_SERVER['HTTP_REFERER'] ?? null, 1024);
+    $timestamp = (new DateTimeImmutable('now'))->format('Y-m-d H:i:s');
+
+    $requestMetadata = [
+        'referer' => $referer,
+        'captured_at' => $timestamp,
+        'headers_checked' => [
+            'HTTP_CF_CONNECTING_IP',
+            'HTTP_TRUE_CLIENT_IP',
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_CLIENT_IP',
+            'REMOTE_ADDR',
+        ],
+    ];
+
+    return [
+        'ip_address' => $ipAddress,
+        'user_agent' => $userAgent,
+        'request_metadata' => json_encode($requestMetadata, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+        'timestamp' => $timestamp,
+    ];
+}
