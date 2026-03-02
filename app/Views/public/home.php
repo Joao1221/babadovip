@@ -139,19 +139,11 @@
         <aside class="fofoca-rail">
             <h3>Fofocas Quentes</h3>
             <?php foreach (array_slice($gossipItems, 0, 20) as $fofoca): ?>
-                <?php if (!empty($fofoca['is_link'])): ?>
-                    <a class="fofoca-item" href="<?= e((string) $fofoca['url']) ?>">
-                <?php else: ?>
-                    <div class="fofoca-item fofoca-item-static">
-                <?php endif; ?>
+                <a class="fofoca-item" href="<?= e((string) $fofoca['url']) ?>">
                     <span class="fofoca-time"><?= e((string) $fofoca['time']) ?></span>
                     <strong><?= e((string) $fofoca['title']) ?></strong>
                     <?php if (!empty($fofoca['subtitle'])): ?><small><?= e((string) $fofoca['subtitle']) ?></small><?php endif; ?>
-                <?php if (!empty($fofoca['is_link'])): ?>
-                    </a>
-                <?php else: ?>
-                    </div>
-                <?php endif; ?>
+                </a>
             <?php endforeach; ?>
         </aside>
     <?php endif; ?>

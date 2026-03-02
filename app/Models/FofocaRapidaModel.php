@@ -9,7 +9,11 @@ final class FofocaRapidaModel extends BaseModel
 {
     public function listAdmin(int $limit = 50, int $offset = 0): array
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM fofocas_rapidas ORDER BY publicado_em DESC, id DESC LIMIT :lim OFFSET :off');
+        $stmt = $this->pdo->prepare("SELECT fr.*, p.slug AS post_slug
+            FROM fofocas_rapidas fr
+            LEFT JOIN posts p ON p.id = fr.post_id
+            ORDER BY fr.publicado_em DESC, fr.id DESC
+            LIMIT :lim OFFSET :off");
         $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
         $stmt->bindValue(':off', $offset, PDO::PARAM_INT);
         $stmt->execute();
@@ -24,7 +28,12 @@ final class FofocaRapidaModel extends BaseModel
 
     public function listPublic(int $limit = 20): array
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM fofocas_rapidas WHERE ativo = 1 ORDER BY publicado_em DESC, id DESC LIMIT :lim');
+        $stmt = $this->pdo->prepare("SELECT fr.*, p.slug AS post_slug
+            FROM fofocas_rapidas fr
+            LEFT JOIN posts p ON p.id = fr.post_id
+            WHERE fr.ativo = 1
+            ORDER BY fr.publicado_em DESC, fr.id DESC
+            LIMIT :lim");
         $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll();
@@ -32,7 +41,11 @@ final class FofocaRapidaModel extends BaseModel
 
     public function findById(int $id): ?array
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM fofocas_rapidas WHERE id = :id LIMIT 1');
+        $stmt = $this->pdo->prepare("SELECT fr.*, p.slug AS post_slug
+            FROM fofocas_rapidas fr
+            LEFT JOIN posts p ON p.id = fr.post_id
+            WHERE fr.id = :id
+            LIMIT 1");
         $stmt->execute(['id' => $id]);
         $row = $stmt->fetch();
         return $row ?: null;
@@ -40,8 +53,8 @@ final class FofocaRapidaModel extends BaseModel
 
     public function create(array $data): int
     {
-        $stmt = $this->pdo->prepare('INSERT INTO fofocas_rapidas (titulo, subtitulo, ativo, publicado_em, criado_em, atualizado_em)
-            VALUES (:titulo, :subtitulo, :ativo, :publicado_em, NOW(), NOW())');
+        $stmt = $this->pdo->prepare('INSERT INTO fofocas_rapidas (titulo, subtitulo, ativo, publicado_em, post_id, criado_em, atualizado_em)
+            VALUES (:titulo, :subtitulo, :ativo, :publicado_em, :post_id, NOW(), NOW())');
         $stmt->execute($data);
         return (int) $this->pdo->lastInsertId();
     }
@@ -50,7 +63,7 @@ final class FofocaRapidaModel extends BaseModel
     {
         $data['id'] = $id;
         $stmt = $this->pdo->prepare('UPDATE fofocas_rapidas
-            SET titulo = :titulo, subtitulo = :subtitulo, ativo = :ativo, publicado_em = :publicado_em, atualizado_em = NOW()
+            SET titulo = :titulo, subtitulo = :subtitulo, ativo = :ativo, publicado_em = :publicado_em, post_id = :post_id, atualizado_em = NOW()
             WHERE id = :id');
         $stmt->execute($data);
     }

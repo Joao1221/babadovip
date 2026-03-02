@@ -84,10 +84,13 @@ CREATE TABLE IF NOT EXISTS fofocas_rapidas (
     titulo VARCHAR(220) NOT NULL,
     subtitulo VARCHAR(500) NULL,
     ativo TINYINT(1) NOT NULL DEFAULT 1,
+    post_id INT NULL,
     publicado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     atualizado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_fofocas_publicacao (ativo, publicado_em)
+    CONSTRAINT fk_fofocas_rapidas_post FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    INDEX idx_fofocas_publicacao (ativo, publicado_em),
+    INDEX idx_fofocas_post (post_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS home_secoes (

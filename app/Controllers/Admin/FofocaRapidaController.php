@@ -7,7 +7,9 @@ use App\Controllers\BaseController;
 use App\Core\Auth;
 use App\Core\Csrf;
 use App\Core\Flash;
+use App\Models\CategoryModel;
 use App\Models\FofocaRapidaModel;
+use App\Models\PostModel;
 
 final class FofocaRapidaController extends BaseController
 {
@@ -71,7 +73,12 @@ final class FofocaRapidaController extends BaseController
     {
         Auth::requireAdmin();
         Csrf::ensure();
-        (new FofocaRapidaModel())->delete((int) $id);
+        $model = new FofocaRapidaModel();
+        $item = $model->findById((int) $id);
+        if ($item && !empty($item['post_id'])) {
+            (new PostModel())->delete((int) $item['post_id']);
+        }
+        $model->delete((int) $id);
         Flash::set('success', 'Fofoca removida.');
         redirect('/admin/fofocas');
     }
@@ -79,7 +86,8 @@ final class FofocaRapidaController extends BaseController
     private function save(?int $id): void
     {
         $model = new FofocaRapidaModel();
-        if ($id && !$model->findById($id)) {
+        $current = $id ? $model->findById($id) : null;
+        if ($id && !$current) {
             Flash::set('danger', 'Fofoca nao encontrada.');
             redirect('/admin/fofocas');
         }
@@ -100,6 +108,7 @@ final class FofocaRapidaController extends BaseController
             'ativo' => $ativo,
             'publicado_em' => $publicadoEm !== '' ? $publicadoEm : now(),
         ];
+        $data['post_id'] = $this->saveLinkedPost($data, (int) ($current['post_id'] ?? 0));
 
         if ($id) {
             $model->update($id, $data);
@@ -110,5 +119,81 @@ final class FofocaRapidaController extends BaseController
         $newId = $model->create($data);
         Flash::set('success', 'Fofoca #' . $newId . ' criada com sucesso. Voce ja pode cadastrar a proxima.');
         redirect('/admin/fofocas/nova');
+    }
+
+    private function saveLinkedPost(array $fofocaData, int $postId): int
+    {
+        $postModel = new PostModel();
+        $categoryId = (new CategoryModel())->ensureFofocasRapidas();
+        $adminId = (int) (Auth::admin()['id'] ?? 1);
+
+        $title = (string) $fofocaData['titulo'];
+        $subtitle = (string) ($fofocaData['subtitulo'] ?? '');
+        $publishedAt = (string) $fofocaData['publicado_em'];
+        $content = $this->buildFofocaContent($title, $subtitle);
+
+        if ($postId > 0) {
+            $existingPost = $postModel->findById($postId);
+            if ($existingPost) {
+                $postModel->update($postId, [
+                    'categoria_id' => $categoryId,
+                    'autor_admin_id' => $adminId,
+                    'titulo' => $title,
+                    'subtitulo' => $subtitle !== '' ? $subtitle : null,
+                    'slug' => $postModel->generateUniqueSlug($title, $postId),
+                    'conteudo_html' => $content,
+                    'status' => 'published',
+                    'publicado_em' => $publishedAt,
+                    'is_breaking' => 0,
+                    'is_exclusivo' => 0,
+                    'is_vip' => 0,
+                    'verificacao' => 'rumor',
+                    'imagem_capa' => $existingPost['imagem_capa'],
+                    'tags' => $existingPost['tags'],
+                    'tempo_leitura' => 1,
+                    'event_data' => null,
+                    'event_hora' => null,
+                    'event_local' => null,
+                    'event_bairro_cidade' => null,
+                    'overlay_titulo_cor' => $existingPost['overlay_titulo_cor'] ?? '#FFFFFF',
+                ]);
+                return $postId;
+            }
+        }
+
+        return $postModel->create([
+            'categoria_id' => $categoryId,
+            'autor_admin_id' => $adminId,
+            'titulo' => $title,
+            'subtitulo' => $subtitle !== '' ? $subtitle : null,
+            'slug' => $postModel->generateUniqueSlug($title),
+            'conteudo_html' => $content,
+            'status' => 'published',
+            'publicado_em' => $publishedAt,
+            'is_breaking' => 0,
+            'is_exclusivo' => 0,
+            'is_vip' => 0,
+            'verificacao' => 'rumor',
+            'imagem_capa' => null,
+            'tags' => null,
+            'tempo_leitura' => 1,
+            'event_data' => null,
+            'event_hora' => null,
+            'event_local' => null,
+            'event_bairro_cidade' => null,
+            'overlay_titulo_cor' => '#FFFFFF',
+        ]);
+    }
+
+    private function buildFofocaContent(string $title, string $subtitle): string
+    {
+        $safeTitle = htmlspecialchars($title, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $safeSubtitle = htmlspecialchars($subtitle, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+
+        if ($safeSubtitle === '') {
+            return '<p>' . $safeTitle . '</p>';
+        }
+
+        return '<p>' . $safeTitle . '</p><p>' . nl2br($safeSubtitle) . '</p>';
     }
 }

@@ -21,9 +21,11 @@ final class PublicController extends BaseController
         $sections = $sectionsModel->all();
         $result = [];
         $gossipItems = array_map(static function (array $fofoca): array {
+            $url = !empty($fofoca['post_slug'])
+                ? url('/materia/' . $fofoca['post_slug'])
+                : url('/fofocas#fofoca-' . (int) $fofoca['id']);
             return [
-                'is_link' => false,
-                'url' => null,
+                'url' => $url,
                 'time' => date('H:i', strtotime((string) $fofoca['publicado_em'])),
                 'title' => $fofoca['titulo'],
                 'subtitle' => $fofoca['subtitulo'] ?? '',

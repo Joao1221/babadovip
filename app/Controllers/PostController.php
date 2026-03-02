@@ -11,6 +11,8 @@ use App\Models\PostPhotoModel;
 
 final class PostController extends BaseController
 {
+    private const COMMENTABLE_CATEGORY_SLUGS = ['fofocas-rapidas', 'eventos-agenda'];
+
     public function show(string $slug): void
     {
         $postModel = new PostModel();
@@ -26,7 +28,7 @@ final class PostController extends BaseController
 
         $postModel->incrementViews((int) $post['id']);
         $photos = $photoModel->listByPost((int) $post['id']);
-        $allowComments = (($post['categoria_slug'] ?? '') === 'fofocas-rapidas');
+        $allowComments = $this->allowsComments($post);
         $comments = $allowComments ? $commentModel->listApprovedByPost((int) $post['id']) : [];
 
         $this->render('public/post', [
@@ -48,8 +50,8 @@ final class PostController extends BaseController
             $this->render('errors/404', ['title' => 'Materia nao encontrada']);
             return;
         }
-        if (($post['categoria_slug'] ?? '') !== 'fofocas-rapidas') {
-            Flash::set('danger', 'Comentarios disponiveis apenas para Fofocas Rapidas.');
+        if (!$this->allowsComments($post)) {
+            Flash::set('danger', 'Comentarios disponiveis apenas para Fofocas e Eventos/Agenda.');
             redirect('/materia/' . $slug);
         }
 
@@ -75,5 +77,11 @@ final class PostController extends BaseController
         );
         Flash::set('success', 'Comentario publicado.');
         redirect('/materia/' . $slug . '#comentarios');
+    }
+
+    private function allowsComments(array $post): bool
+    {
+        $slug = (string) ($post['categoria_slug'] ?? '');
+        return in_array($slug, self::COMMENTABLE_CATEGORY_SLUGS, true);
     }
 }
