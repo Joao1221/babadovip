@@ -22,7 +22,9 @@
                         <?php $headlineColor = (isset($main['overlay_titulo_cor']) && preg_match('/^#[0-9A-Fa-f]{6}$/', (string) $main['overlay_titulo_cor'])) ? (string) $main['overlay_titulo_cor'] : '#FFFFFF'; ?>
                         <article class="card card-principal">
                             <?php if (!empty($main['imagem_capa'])): ?>
-                                <img loading="lazy" src="<?= e(url($main['imagem_capa'])) ?>" alt="<?= e($main['titulo']) ?>">
+                                <a href="<?= e(url('/materia/' . $main['slug'])) ?>">
+                                    <img loading="lazy" src="<?= e(url($main['imagem_capa'])) ?>" alt="<?= e($main['titulo']) ?>">
+                                </a>
                             <?php endif; ?>
                             <div class="card-body card-principal-overlay">
                                 <h3><a href="<?= e(url('/materia/' . $main['slug'])) ?>" style="color: <?= e($headlineColor) ?>;"><?= e($main['titulo']) ?></a></h3>
@@ -35,7 +37,9 @@
                             <?php foreach ($secondRow as $post): ?>
                                 <article class="card">
                                     <?php if (!empty($post['imagem_capa'])): ?>
-                                        <img loading="lazy" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>">
+                                        <a href="<?= e(url('/materia/' . $post['slug'])) ?>">
+                                            <img loading="lazy" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>">
+                                        </a>
                                     <?php endif; ?>
                                     <div class="card-body">
                                         <div class="meta">
@@ -75,7 +79,9 @@
                             <?php foreach ($top as $post): ?>
                                 <article class="card ultimas-top-card">
                                     <?php if (!empty($post['imagem_capa'])): ?>
-                                        <img loading="lazy" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>">
+                                        <a href="<?= e(url('/materia/' . $post['slug'])) ?>">
+                                            <img loading="lazy" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>">
+                                        </a>
                                     <?php endif; ?>
                                     <div class="card-body">
                                         <div class="meta">
@@ -94,7 +100,9 @@
                             <?php foreach ($rest as $post): ?>
                                 <article class="card">
                                     <?php if (!empty($post['imagem_capa'])): ?>
-                                        <img loading="lazy" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>">
+                                        <a href="<?= e(url('/materia/' . $post['slug'])) ?>">
+                                            <img loading="lazy" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>">
+                                        </a>
                                     <?php endif; ?>
                                     <div class="card-body">
                                         <div class="meta">
@@ -113,7 +121,9 @@
                         <?php foreach ($posts as $index => $post): ?>
                             <article class="card <?= $index === 0 ? 'featured' : '' ?>">
                                 <?php if (!empty($post['imagem_capa'])): ?>
-                                    <img loading="lazy" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>">
+                                    <a href="<?= e(url('/materia/' . $post['slug'])) ?>">
+                                        <img loading="lazy" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>">
+                                    </a>
                                 <?php endif; ?>
                                 <div class="card-body">
                                     <div class="meta">

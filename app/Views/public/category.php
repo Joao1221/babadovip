@@ -11,7 +11,11 @@
 <div class="cards-grid">
     <?php foreach ($posts as $post): ?>
         <article class="card">
-            <?php if (!empty($post['imagem_capa'])): ?><img loading="lazy" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>"><?php endif; ?>
+            <?php if (!empty($post['imagem_capa'])): ?>
+                <a href="<?= e(url('/materia/' . $post['slug'])) ?>">
+                    <img loading="lazy" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>">
+                </a>
+            <?php endif; ?>
             <div class="card-body">
                 <h3><a href="<?= e(url('/materia/' . $post['slug'])) ?>"><?= e($post['titulo']) ?></a></h3>
                 <p><?= e((string) $post['subtitulo']) ?></p>

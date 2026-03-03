@@ -168,6 +168,26 @@ final class PostModel extends BaseModel
         return (int) $stmt->fetchColumn();
     }
 
+    public function totalViewsAdmin(array $filters): int
+    {
+        [$where, $params] = $this->buildAdminFilters($filters);
+        $stmt = $this->pdo->prepare("SELECT COALESCE(SUM(p.view_count), 0) FROM posts p {$where}");
+        $stmt->execute($params);
+        return (int) $stmt->fetchColumn();
+    }
+
+    public function topViewedAdmin(int $limit = 5): array
+    {
+        $stmt = $this->pdo->prepare("SELECT p.id, p.titulo, p.slug, p.view_count
+            FROM posts p
+            WHERE p.categoria_id NOT IN (SELECT id FROM categorias WHERE slug = 'fofocas-rapidas')
+            ORDER BY p.view_count DESC, COALESCE(p.publicado_em, p.criado_em) DESC
+            LIMIT :lim");
+        $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
     private function buildAdminFilters(array $filters): array
     {
         $where = ["p.categoria_id NOT IN (SELECT id FROM categorias WHERE slug = 'fofocas-rapidas')"];

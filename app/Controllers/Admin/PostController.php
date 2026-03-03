@@ -11,6 +11,7 @@ use App\Models\CategoryModel;
 use App\Models\HomeCardModel;
 use App\Models\PostModel;
 use App\Models\PostPhotoModel;
+use App\Models\SiteVisitModel;
 use App\Services\UploadService;
 
 final class PostController extends BaseController
@@ -40,13 +41,22 @@ final class PostController extends BaseController
         $offset = ($page - 1) * $limit;
 
         $postModel = new PostModel();
+        $siteVisitModel = new SiteVisitModel();
         $posts = $postModel->listAdmin($filters, $limit, $offset);
         $count = $postModel->countAdmin($filters);
+        $totalViews = $postModel->totalViewsAdmin($filters);
+        $topViewed = $postModel->topViewedAdmin(5);
+        $siteVisitsTotal = $siteVisitModel->totalVisits();
+        $siteVisitsToday = $siteVisitModel->todayVisits();
         $pages = (int) max(1, ceil($count / $limit));
 
         $this->render('admin/posts/index', [
             'title' => 'Materias - Admin',
             'posts' => $posts,
+            'totalViews' => $totalViews,
+            'topViewed' => $topViewed,
+            'siteVisitsTotal' => $siteVisitsTotal,
+            'siteVisitsToday' => $siteVisitsToday,
             'filters' => $filters,
             'categories' => (new CategoryModel())->allActive(),
             'page' => $page,

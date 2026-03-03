@@ -32,7 +32,7 @@ $router->get('/admin/login', [AuthController::class, 'loginForm']);
 $router->post('/admin/login', [AuthController::class, 'login']);
 $router->post('/admin/logout', [AuthController::class, 'logout']);
 
-$router->get('/admin', [AdminPostController::class, 'dashboard']);
+$router->get('/admin', [HomeBuilderController::class, 'index']);
 $router->get('/admin/posts', [AdminPostController::class, 'index']);
 $router->get('/admin/posts/novo', [AdminPostController::class, 'create']);
 $router->post('/admin/posts', [AdminPostController::class, 'store']);

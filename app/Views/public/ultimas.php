@@ -35,7 +35,11 @@
         <section class="ultimas-mosaico-board">
             <?php if ($lead): ?>
                 <article class="ultimas-mosaico-lead">
-                    <?php if (!empty($lead['imagem_capa'])): ?><img loading="lazy" src="<?= e(url($lead['imagem_capa'])) ?>" alt="<?= e($lead['titulo']) ?>"><?php endif; ?>
+                    <?php if (!empty($lead['imagem_capa'])): ?>
+                        <a href="<?= e(url('/materia/' . $lead['slug'])) ?>">
+                            <img loading="lazy" src="<?= e(url($lead['imagem_capa'])) ?>" alt="<?= e($lead['titulo']) ?>">
+                        </a>
+                    <?php endif; ?>
                     <div class="card-body">
                         <div class="meta">
                             <?php if (!empty($lead['categoria_nome'])): ?><span><?= e((string) $lead['categoria_nome']) ?></span><?php endif; ?>
@@ -48,7 +52,11 @@
             <?php endif; ?>
             <?php if ($side): ?>
                 <article class="ultimas-mosaico-side">
-                    <?php if (!empty($side['imagem_capa'])): ?><img loading="lazy" src="<?= e(url($side['imagem_capa'])) ?>" alt="<?= e($side['titulo']) ?>"><?php endif; ?>
+                    <?php if (!empty($side['imagem_capa'])): ?>
+                        <a href="<?= e(url('/materia/' . $side['slug'])) ?>">
+                            <img loading="lazy" src="<?= e(url($side['imagem_capa'])) ?>" alt="<?= e($side['titulo']) ?>">
+                        </a>
+                    <?php endif; ?>
                     <div class="card-body">
                         <div class="meta">
                             <?php if (!empty($side['categoria_nome'])): ?><span><?= e((string) $side['categoria_nome']) ?></span><?php endif; ?>
@@ -63,7 +71,11 @@
                 <div class="ultimas-mosaico-stream">
                     <?php foreach ($rest as $post): ?>
                         <article class="ultimas-mosaico-tile">
-                            <?php if (!empty($post['imagem_capa'])): ?><img loading="lazy" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>"><?php endif; ?>
+                            <?php if (!empty($post['imagem_capa'])): ?>
+                                <a href="<?= e(url('/materia/' . $post['slug'])) ?>">
+                                    <img loading="lazy" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>">
+                                </a>
+                            <?php endif; ?>
                             <div class="card-body">
                                 <div class="meta">
                                     <?php if (!empty($post['categoria_nome'])): ?><span><?= e((string) $post['categoria_nome']) ?></span><?php endif; ?>
@@ -81,7 +93,11 @@
         <div class="cards-grid ultimas-grid layout-<?= e((string) $sectionLayout) ?>">
             <?php foreach ($posts as $post): ?>
                 <article class="card">
-                    <?php if (!empty($post['imagem_capa'])): ?><img loading="lazy" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>"><?php endif; ?>
+                    <?php if (!empty($post['imagem_capa'])): ?>
+                        <a href="<?= e(url('/materia/' . $post['slug'])) ?>">
+                            <img loading="lazy" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>">
+                        </a>
+                    <?php endif; ?>
                     <div class="card-body">
                         <div class="meta">
                             <?php if (!empty($post['categoria_nome'])): ?><span><?= e((string) $post['categoria_nome']) ?></span><?php endif; ?>

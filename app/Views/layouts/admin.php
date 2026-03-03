@@ -13,11 +13,11 @@
 <body class="admin-body <?= Auth::check() ? 'admin-auth' : 'admin-guest' ?>">
 <?php if (Auth::check()): ?>
 <aside class="admin-sidebar">
-    <a class="brand" href="<?= e(url('/admin')) ?>"><span class="brand-babado">Babado</span><span class="brand-vip">Vip</span></a>
+    <a class="brand" href="<?= e(url('/admin/home-builder')) ?>"><span class="brand-babado">Babado</span><span class="brand-vip">Vip</span></a>
     <a href="<?= e(url('/admin/home-builder')) ?>">Home Builder</a>
     <a href="<?= e(url('/admin/posts')) ?>">Materias</a>
     <a href="<?= e(url('/admin/fofocas')) ?>">Fofocas Rapidas</a>
-    <a href="<?= e(url('/admin/submissions')) ?>">Envios dos leitores</a>
+    <a href="<?= e(url('/admin/submissions')) ?>">Sugestões dos Leitores</a>
     <a href="<?= e(url('/admin/messages')) ?>">Mensagens</a>
     <form action="<?= e(url('/admin/logout')) ?>" method="post">
         <?= Csrf::field() ?>

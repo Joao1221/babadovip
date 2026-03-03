@@ -40,4 +40,7 @@ return [
         'login_block_seconds' => 30,
         'max_upload_size' => 5 * 1024 * 1024,
     ],
+    'analytics' => [
+        'ga4_measurement_id' => trim((string) $read('GA4_MEASUREMENT_ID', '')),
+    ],
 ];

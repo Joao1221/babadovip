@@ -16,7 +16,7 @@ final class AuthController extends BaseController
     public function loginForm(): void
     {
         if (Auth::check()) {
-            redirect('/admin');
+            redirect('/admin/home-builder');
         }
         $this->render('admin/login', ['title' => 'Login Admin - BabadoVip'], 'admin');
     }
@@ -51,7 +51,7 @@ final class AuthController extends BaseController
         Auth::login($admin);
         $adminModel->updateLastLogin((int) $admin['id']);
         RateLimiter::clearLoginFailures($pdo, $ipHash);
-        redirect('/admin');
+        redirect('/admin/home-builder');
     }
 
     public function logout(): void

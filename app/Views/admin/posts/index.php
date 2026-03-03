@@ -36,9 +36,40 @@
 </form>
 </section>
 
+<div class="cards-grid">
+    <article class="card">
+        <div class="card-body">
+            <h3>Acessos do site</h3>
+            <p><strong><?= e(number_format((int) ($siteVisitsTotal ?? 0), 0, ',', '.')) ?></strong> total</p>
+            <p class="muted"><?= e(number_format((int) ($siteVisitsToday ?? 0), 0, ',', '.')) ?> hoje</p>
+        </div>
+    </article>
+    <article class="card">
+        <div class="card-body">
+            <h3>Total de acessos (filtro atual)</h3>
+            <p><strong><?= e(number_format((int) ($totalViews ?? 0), 0, ',', '.')) ?></strong></p>
+        </div>
+    </article>
+    <article class="card">
+        <div class="card-body">
+            <h3>Top 5 mais acessadas</h3>
+            <?php if (!empty($topViewed)): ?>
+                <?php foreach ($topViewed as $item): ?>
+                    <p>
+                        <a href="<?= e(url('/admin/posts/' . $item['id'] . '/editar')) ?>"><?= e((string) $item['titulo']) ?></a>
+                        <small class="muted"> (<?= e(number_format((int) ($item['view_count'] ?? 0), 0, ',', '.')) ?> acessos)</small>
+                    </p>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p class="muted">Sem dados de acesso ainda.</p>
+            <?php endif; ?>
+        </div>
+    </article>
+</div>
+
 <div class="table-wrap">
 <table>
-    <thead><tr><th>ID</th><th>Thumb</th><th>Titulo</th><th>Categoria</th><th>Status</th><th>Data</th><th>Acoes</th></tr></thead>
+    <thead><tr><th>ID</th><th>Thumb</th><th>Titulo</th><th>Categoria</th><th>Status</th><th>Acessos</th><th>Data</th><th>Acoes</th></tr></thead>
     <tbody>
     <?php foreach ($posts as $post): ?>
         <tr>
@@ -53,6 +84,7 @@
             <td><?= e($post['titulo']) ?><br><small><?= e($post['slug']) ?></small></td>
             <td><?= e((string) $post['categoria_nome']) ?></td>
             <td><?= e($statusLabels[$post['status']] ?? $post['status']) ?></td>
+            <td><?= e(number_format((int) ($post['view_count'] ?? 0), 0, ',', '.')) ?></td>
             <td><?= e(date('d/m/Y H:i', strtotime((string) $post['criado_em']))) ?></td>
             <td class="actions">
                 <a class="btn-small" href="<?= e(url('/admin/posts/' . $post['id'] . '/editar')) ?>">Editar</a>

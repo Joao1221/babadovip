@@ -5,10 +5,20 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($title ?? 'BabadoVip') ?></title>
+    <?php $ga4MeasurementId = trim((string) config('analytics.ga4_measurement_id', '')); ?>
     <?php $cssVer = @filemtime(PUBLIC_PATH . '/assets/css/app.css') ?: time(); ?>
     <?php $jsVer = @filemtime(PUBLIC_PATH . '/assets/js/app.js') ?: time(); ?>
     <link rel="icon" type="image/png" href="<?= e(url('img/favicon2.png')) ?>">
     <link rel="stylesheet" href="<?= e(url('assets/css/app.css?v=' . $cssVer)) ?>">
+    <?php if ($ga4MeasurementId !== ''): ?>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=<?= e($ga4MeasurementId) ?>"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', <?= json_encode($ga4MeasurementId, JSON_UNESCAPED_SLASHES) ?>);
+        </script>
+    <?php endif; ?>
 </head>
 <body>
 <header class="site-header">
