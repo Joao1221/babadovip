@@ -8,7 +8,7 @@
             <span class="badge"><?= e($post['verificacao']) ?></span>
         </div>
         <p class="meta">Por <?= e($post['autor_nome'] ?? 'Redacao') ?> | <?= e(date('d/m/Y H:i', strtotime((string) ($post['publicado_em'] ?? $post['criado_em'])))) ?> | <?= (int) ($post['tempo_leitura'] ?? 3) ?> min</p>
-        <h1><?= e($post['titulo']) ?></h1>
+        <h1><?= e_with_br($post['titulo']) ?></h1>
         <?php if ($post['subtitulo']): ?><p class="lead"><?= e($post['subtitulo']) ?></p><?php endif; ?>
         <?php if ($post['imagem_capa']): ?><img class="cover" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>"><?php endif; ?>
     </header>

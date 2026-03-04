@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 03/03/2026 às 00:28
--- Versão do servidor: 10.4.32-MariaDB
--- Versão do PHP: 8.2.12
+-- Tempo de geração: 04/03/2026 às 20:29
+-- Versão do servidor: 10.4.28-MariaDB
+-- Versão do PHP: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -41,7 +41,7 @@ CREATE TABLE `admins` (
 --
 
 INSERT INTO `admins` (`id`, `nome`, `email`, `senha_hash`, `criado_em`, `ultimo_login`) VALUES
-(1, 'Administrador', 'admin@babadovip.local', '$2y$10$2gC94XTw8YirdgXckDJKcOsN24MqxmGOIaO8DDadrz3kQhknv4lRu', '2026-03-01 11:52:43', '2026-03-02 19:51:38');
+(1, 'Administrador', 'admin@babadovip.local', '$2y$10$2gC94XTw8YirdgXckDJKcOsN24MqxmGOIaO8DDadrz3kQhknv4lRu', '2026-03-01 11:52:43', '2026-03-04 14:10:26');
 
 -- --------------------------------------------------------
 
@@ -140,7 +140,7 @@ INSERT INTO `fofocas_rapidas` (`id`, `titulo`, `subtitulo`, `ativo`, `post_id`, 
 (2, 'Bar da cidade na mira da lei', 'Um certo bar da cidade está na mira da polícia, segundo informações apuradas ele estaria sendo espaço de prostituição, cuidado viu!', 1, 14, '2026-03-01 21:48:00', '2026-03-01 21:51:56', '2026-03-02 20:25:13'),
 (3, 'Amigos ou casal?', 'Será que aquela amizade entre os dois amigos se tornará um belo romance? Hum! As más línguas já estão comentando viu! Eu não sei de nada apenas ouço e reproduzo...', 1, 15, '2026-02-26 21:55:00', '2026-03-01 21:57:00', '2026-03-02 20:25:13'),
 (4, 'Ferveu o aniversário do bofe!', 'Foi um show o aniversário de nosso amado \'Amando\' ele deu uma belíssima festa para os amigos e poucos convidados. Show!', 1, 16, '2026-03-01 21:57:00', '2026-03-01 21:59:09', '2026-03-02 20:25:13'),
-(5, 'A menina disputada', 'Ela está sendo disputada por dois rapagões, quem será o dono do seu coração? Meninos sejam criativos, quem for mais e melhor, deverá ser o escolhido. Boa sorte aos três. rsrsrsrs', 1, 17, '2026-03-01 22:00:00', '2026-03-01 22:01:53', '2026-03-02 20:25:13'),
+(5, 'A gata mais disputada', 'Ela está sendo disputada por dois rapagões, quem será o dono do seu coração? Meninos sejam criativos, quem for mais e melhor, deverá ser o escolhido. Boa sorte aos três. rsrsrsrs', 1, 17, '2026-03-01 22:00:00', '2026-03-01 22:01:53', '2026-03-04 14:45:20'),
 (6, 'Encontro dos amigos', 'Deu ruim o encontro dos amigos no último dia 25/02 tudo parecia ir muito bem até um deles jogar cerveja na cara do outro, isso foi o estopim para uma briga generalizada. Nossa que feio!', 1, 18, '2026-03-01 22:01:00', '2026-03-01 22:03:30', '2026-03-02 20:25:13');
 
 -- --------------------------------------------------------
@@ -162,7 +162,7 @@ CREATE TABLE `home_cards` (
 --
 
 INSERT INTO `home_cards` (`id`, `secao_id`, `posicao`, `post_id`, `fixo`) VALUES
-(1, 1, 1, 3, 1),
+(1, 1, 1, 20, 1),
 (2, 1, 2, 12, 1),
 (3, 2, 1, 3, 1),
 (4, 2, 2, 4, 1),
@@ -223,7 +223,7 @@ CREATE TABLE `posts` (
   `id` int(11) NOT NULL,
   `categoria_id` int(11) NOT NULL,
   `autor_admin_id` int(11) NOT NULL,
-  `titulo` varchar(180) NOT NULL,
+  `titulo` varchar(500) NOT NULL,
   `subtitulo` varchar(255) DEFAULT NULL,
   `slug` varchar(190) NOT NULL,
   `conteudo_html` longtext NOT NULL,
@@ -243,32 +243,34 @@ CREATE TABLE `posts` (
   `event_hora` time DEFAULT NULL,
   `event_local` varchar(180) DEFAULT NULL,
   `event_bairro_cidade` varchar(180) DEFAULT NULL,
-  `overlay_titulo_cor` varchar(7) NOT NULL DEFAULT '#FFFFFF'
+  `overlay_titulo_cor` varchar(7) NOT NULL DEFAULT '#FFFFFF',
+  `subchamadas_home` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Despejando dados para a tabela `posts`
 --
 
-INSERT INTO `posts` (`id`, `categoria_id`, `autor_admin_id`, `titulo`, `subtitulo`, `slug`, `conteudo_html`, `status`, `publicado_em`, `criado_em`, `atualizado_em`, `is_breaking`, `is_exclusivo`, `is_vip`, `verificacao`, `imagem_capa`, `tags`, `tempo_leitura`, `view_count`, `event_data`, `event_hora`, `event_local`, `event_bairro_cidade`, `overlay_titulo_cor`) VALUES
-(1, 1, 1, 'Noite de Gala reúne sociedade capelense', 'Cobertura exclusiva do evento mais comentado da semana', 'noite-de-gala-reune-sociedade-capelense', '<p>O BabadoVip acompanhou todos os detalhes da noite de gala com convidados, música ao vivo e muito brilho.</p><p>Confira os bastidores na galeria abaixo.</p>', 'published', '2026-02-28 11:52:43', '2026-03-01 11:52:43', '2026-03-02 20:27:51', 1, 1, 1, 'confirmado', 'img/foto32.jpg', 'gala,sociedade', 4, 123, NULL, NULL, NULL, NULL, '#FFFFFF'),
-(2, 1, 1, 'Aniversário luxuoso movimenta a cidade', 'Lista VIP, decoração premium e presença de influenciadores locais', 'aniversario-luxuoso-movimenta-centro', '<h3>Que festa maravilhosa!</h3>\r\n<p>Uma celebração impecável com atrações especiais e cobertura completa da nossa equipe.</p>\r\n<p>Não faltou nada, tudo muito lindo e bem organizado, um luxo, a debutante estava espetacular. Parabéns a ela e aos pais pela belíssima festa</p>', 'published', '2026-02-27 11:52:00', '2026-03-01 11:52:43', '2026-03-01 20:32:26', 0, 1, 1, 'confirmado', 'uploads/posts/2026/03/post-2/capa/86ae3128a4f81a906594a60c58bd105b.jpg', 'aniversario,vip', 3, 98, NULL, NULL, NULL, NULL, '#FFFFFF'),
-(3, 2, 1, 'Festival de Verão confirmado para sábado', 'Evento terá atrações regionais e praça gastronômica', 'festival-de-verao-confirmado-para-sabado', '<p>O festival acontece no próximo sábado com início às 18h, entrada solidária e estrutura reforçada.</p>', 'published', '2026-03-01 07:52:43', '2026-03-01 11:52:43', '2026-03-02 20:26:54', 1, 0, 0, 'confirmado', 'img/foto30.jpg', 'festival,agenda', 3, 214, '2026-03-06', '18:00:00', 'Praça Central', 'Centro - Capela', '#FFFFFF'),
-(4, 2, 1, 'Agenda cultural: feira criativa no domingo', 'Artesanato, música e espaço para toda família', 'agenda-cultural-feira-criativa-no-domingo', '<p>A feira criativa será realizada no bairro Eldorado com atrações ao longo do dia.</p>', 'published', '2026-03-01 04:52:43', '2026-03-01 11:52:43', '2026-03-01 12:39:19', 0, 0, 0, 'rumor', 'img/foto29.jpg', 'agenda,cultura', 2, 81, '2026-03-08', '09:00:00', 'Espaço Eldorado', 'Eldorado - Capela', '#FFFFFF'),
-(5, 3, 1, 'Últimas: novo point gastronômico vira febre', 'Casa recém inaugurada lota no primeiro fim de semana', 'ultimas-novo-point-gastronomico-vira-febre', '<p>O novo point já entrou no radar da cidade e promete noites movimentadas.</p>', 'published', '2026-03-01 09:52:43', '2026-03-01 11:52:43', '2026-03-02 20:23:05', 0, 0, 0, 'rumor', 'img/foto28.jpg', 'gastronomia,babado', 2, 70, NULL, NULL, NULL, NULL, '#FFFFFF'),
-(6, 3, 1, 'Últimas: celebridade regional passa pela cidade', 'A visita surpresa agitou fãs e curiosos na avenida principal', 'ultimas-celebridade-regional-passa-pela-cidade', '<p>A passagem rápida gerou vídeos e comentários nas redes sociais.</p>', 'published', '2026-03-01 10:52:43', '2026-03-01 11:52:43', '2026-03-02 20:18:03', 1, 0, 1, 'confirmado', 'img/foto27.jpg', 'celebridade,ultimas', 2, 304, NULL, NULL, NULL, NULL, '#FFFFFF'),
-(7, 2, 1, 'Amistoso contra a equipe do Dorense', 'Jogo de história e rivalidade', 'amistoso-contra-a-equipe-do-dorense', 'Grande amistoso entre as equipes do Rio Branco x Dorense. O evento acontecerá em Capela, no estádio Jackson Alves de Carvalho (Rio Branco). No dia 08.03.2026 venha curtir uma tarde de espetáculo de futebol.', 'published', '2026-03-01 16:08:00', '2026-03-01 13:08:49', '2026-03-01 13:10:35', 1, 0, 0, 'confirmado', 'uploads/submissions/2026/03/sub-1/65daba6c6d73dcc21c562bfdcb698fdd.png', 'amistoso-rio-branco-dorense', 1, 0, '2026-03-08', '14:00:00', 'Rio Branco', 'Capela', '#FFFFFF'),
-(8, 2, 1, 'Encontro Cultura da Cidade', 'Evento terá atrações regionais e praça gastronômica', 'festival-de-ver-ao-confirmado-para-s-abado-c-opia', '<p>O festival acontece no próximo sábado com início às 18h, entrada solidária e estrutura reforçada.</p>', 'published', '2026-03-01 18:56:00', '2026-03-01 20:10:43', '2026-03-02 20:27:27', 1, 0, 0, 'confirmado', 'uploads/posts/2026/03/post-8/capa/5b2fc7ad5f60a32c13035c726a522e94.jpg', 'festival,agenda', 3, 1, '2026-03-06', '18:00:00', 'Praça Central', 'Centro - Capela', '#FFFFFF'),
-(9, 2, 1, 'Encontro de jornalistas em pró da liberdade', 'Contra o preconceito de gênero e cor', 'agenda-cultural-feira-criativa-no-domingo-c-opia', '<p>A feira criativa será realizada no bairro Eldorado com atrações ao longo do dia.</p>', 'published', '2026-03-01 19:25:00', '2026-03-01 20:11:47', '2026-03-02 20:27:34', 0, 0, 0, 'rumor', 'uploads/posts/2026/03/post-9/capa/d934f5e84713691ef604a32891528ce7.jpg', 'agenda,cultura', 2, 1, '2026-03-08', '09:00:00', 'Espaço Eldorado', 'Eldorado - Capela', '#FFFFFF'),
-(10, 4, 1, 'Casal flagrado em atos obscenos!', 'Em plena praça pública, casal foi pego fazendo sabe o quê?', 'casal-flagrado-em-atos-obscenos', 'É isso mesmo que você está pensando, casal foi flagrado em plena praça pública fazendo sexo explícito, não pense que foi escondido, foi para todos verem e desfrutarem do momento. Que coisa, essa eu não esperava! Quem será esse casal?', 'published', '2026-03-01 20:38:14', '2026-03-01 20:38:14', '2026-03-02 20:05:00', 0, 0, 1, 'rumor', NULL, 'casal-flagra', 3, 27, NULL, '20:25:00', NULL, 'Praça pública', '#FFFFFF'),
-(11, 4, 1, 'Bar da cidade na mira da lei', 'Verdade, certo bar na cidade que está na mira dos homens', 'casal-flagrado-em-atos-obscenos-copia', 'Sim! Isso está sendo apurado pelas minhas fontes que um certo bar da cidade está sendo monitorado pela venda de bebidas a menores. Cuidado gente! Isso é ilegal, NÃO PODE!', 'published', '2026-03-01 21:34:48', '2026-03-01 21:31:58', '2026-03-02 20:04:25', 0, 0, 0, 'rumor', NULL, 'na-mira, lei', 3, 1, NULL, '20:25:00', NULL, 'Cidade', '#FFFFFF'),
-(12, 1, 1, 'Aniversário da Maju Leite', 'Festa grandiosa e elegante', 'festa-grandiosa', 'Foi um luxo a festa de aniversário da líndíssima Maju, só gente bonita e elegante presentes. Ela como sempre muito atendioca com todos, comemorou muito. Todos foram só elogios, festa para ficar na memória de todos. Parabéns Maju!', 'published', '2026-03-01 22:30:00', '2026-03-01 22:33:18', '2026-03-02 20:27:42', 0, 0, 0, 'confirmado', 'uploads/posts/2026/03/post-12/capa/f0d738cab132de17c2673938339a73d6.png', 'aniversario,vip', 2, 4, '2026-02-22', '19:00:00', 'Clube social Rio Branco', 'Aniversário', '#FFFFFF'),
-(13, 4, 1, 'Casal flagrado em atos obscenos!', 'Gente não é mentira, foi fato, aconteceu na nossa cidade. Um certo casal conhecido na cidade foi pego fazendo aquilo em plena praça pública.', 'fofoca-rapida-1', '<p>Casal flagrado em atos obscenos!</p><p>Gente não é mentira, foi fato, aconteceu na nossa cidade. Um certo casal conhecido na cidade foi pego fazendo aquilo em plena praça pública.</p>', 'published', '2026-03-01 21:47:00', '2026-03-02 20:25:13', '2026-03-02 20:25:13', 0, 0, 0, 'rumor', NULL, NULL, 1, 0, NULL, NULL, NULL, NULL, '#FFFFFF'),
-(14, 4, 1, 'Bar da cidade na mira da lei', 'Um certo bar da cidade está na mira da polícia, segundo informações apuradas ele estaria sendo espaço de prostituição, cuidado viu!', 'fofoca-rapida-2', '<p>Bar da cidade na mira da lei</p><p>Um certo bar da cidade está na mira da polícia, segundo informações apuradas ele estaria sendo espaço de prostituição, cuidado viu!</p>', 'published', '2026-03-01 21:48:00', '2026-03-02 20:25:13', '2026-03-02 20:25:13', 0, 0, 0, 'rumor', NULL, NULL, 1, 0, NULL, NULL, NULL, NULL, '#FFFFFF'),
-(15, 4, 1, 'Amigos ou casal?', 'Será que aquela amizade entre os dois amigos se tornará um belo romance? Hum! As más línguas já estão comentando viu! Eu não sei de nada apenas ouço e reproduzo...', 'fofoca-rapida-3', '<p>Amigos ou casal?</p><p>Será que aquela amizade entre os dois amigos se tornará um belo romance? Hum! As más línguas já estão comentando viu! Eu não sei de nada apenas ouço e reproduzo...</p>', 'published', '2026-02-26 21:55:00', '2026-03-02 20:25:13', '2026-03-02 20:25:13', 0, 0, 0, 'rumor', NULL, NULL, 1, 0, NULL, NULL, NULL, NULL, '#FFFFFF'),
-(16, 4, 1, 'Ferveu o aniversário do bofe!', 'Foi um show o aniversário de nosso amado \'Amando\' ele deu uma belíssima festa para os amigos e poucos convidados. Show!', 'fofoca-rapida-4', '<p>Ferveu o aniversário do bofe!</p><p>Foi um show o aniversário de nosso amado \'Amando\' ele deu uma belíssima festa para os amigos e poucos convidados. Show!</p>', 'published', '2026-03-01 21:57:00', '2026-03-02 20:25:13', '2026-03-02 20:25:13', 0, 0, 0, 'rumor', NULL, NULL, 1, 0, NULL, NULL, NULL, NULL, '#FFFFFF'),
-(17, 4, 1, 'A menina disputada', 'Ela está sendo disputada por dois rapagões, quem será o dono do seu coração? Meninos sejam criativos, quem for mais e melhor, deverá ser o escolhido. Boa sorte aos três. rsrsrsrs', 'fofoca-rapida-5', '<p>A menina disputada</p><p>Ela está sendo disputada por dois rapagões, quem será o dono do seu coração? Meninos sejam criativos, quem for mais e melhor, deverá ser o escolhido. Boa sorte aos três. rsrsrsrs</p>', 'published', '2026-03-01 22:00:00', '2026-03-02 20:25:13', '2026-03-02 20:25:13', 0, 0, 0, 'rumor', NULL, NULL, 1, 0, NULL, NULL, NULL, NULL, '#FFFFFF'),
-(18, 4, 1, 'Encontro dos amigos', 'Deu ruim o encontro dos amigos no último dia 25/02 tudo parecia ir muito bem até um deles jogar cerveja na cara do outro, isso foi o estopim para uma briga generalizada. Nossa que feio!', 'fofoca-rapida-6', '<p>Encontro dos amigos</p><p>Deu ruim o encontro dos amigos no último dia 25/02 tudo parecia ir muito bem até um deles jogar cerveja na cara do outro, isso foi o estopim para uma briga generalizada. Nossa que feio!</p>', 'published', '2026-03-01 22:01:00', '2026-03-02 20:25:13', '2026-03-02 20:26:28', 0, 0, 0, 'rumor', NULL, NULL, 1, 2, NULL, NULL, NULL, NULL, '#FFFFFF');
+INSERT INTO `posts` (`id`, `categoria_id`, `autor_admin_id`, `titulo`, `subtitulo`, `slug`, `conteudo_html`, `status`, `publicado_em`, `criado_em`, `atualizado_em`, `is_breaking`, `is_exclusivo`, `is_vip`, `verificacao`, `imagem_capa`, `tags`, `tempo_leitura`, `view_count`, `event_data`, `event_hora`, `event_local`, `event_bairro_cidade`, `overlay_titulo_cor`, `subchamadas_home`) VALUES
+(1, 1, 1, 'Noite de Gala reúne sociedade capelense', 'Cobertura exclusiva do evento mais comentado da semana', 'noite-de-gala-reune-sociedade-capelense', '<p>O BabadoVip acompanhou todos os detalhes da noite de gala com convidados, música ao vivo e muito brilho.</p><p>Confira os bastidores na galeria abaixo.</p>', 'published', '2026-02-28 11:52:43', '2026-03-01 11:52:43', '2026-03-02 20:27:51', 1, 1, 1, 'confirmado', 'img/foto32.jpg', 'gala,sociedade', 4, 123, NULL, NULL, NULL, NULL, '#FFFFFF', NULL),
+(2, 1, 1, 'Aniversário luxuoso movimenta a cidade', 'Lista VIP, decoração premium e presença de influenciadores locais', 'aniversario-luxuoso-movimenta-centro', '<h3>Que festa maravilhosa!</h3>\r\n<p>Uma celebração impecável com atrações especiais e cobertura completa da nossa equipe.</p>\r\n<p>Não faltou nada, tudo muito lindo e bem organizado, um luxo, a debutante estava espetacular. Parabéns a ela e aos pais pela belíssima festa</p>', 'published', '2026-02-27 11:52:00', '2026-03-01 11:52:43', '2026-03-01 20:32:26', 0, 1, 1, 'confirmado', 'uploads/posts/2026/03/post-2/capa/86ae3128a4f81a906594a60c58bd105b.jpg', 'aniversario,vip', 3, 98, NULL, NULL, NULL, NULL, '#FFFFFF', NULL),
+(3, 2, 1, 'BabadoVip! O seu passaporte para o lado mais comentado da cidade! Aqui é onde a sociedade capelense se encontra para saber de tudo: festas, eventos e aquele babado que todo mundo quer descobrir primeiro.', 'Evento terá atrações regionais e praça gastronômica', 'festival-de-verao-confirmado-para-sabado', '<h2>Grande evento da cidade</h2>\r\n<p>O festival acontece no próximo sábado com início às 18h, entrada solidária e estrutura reforçada.</p>\r\n\r\n<p>A cidade de Capela, no leste sergipano, é um palco vibrante de tradições e eventos culturais que mobilizam a comunidade. Um dos mais emblemáticos é a Festa do Mastro de São Pedro, uma manifestação que une fé, música e história em um cortejo popular único . Durante a celebração, uma multidão toma as ruas em uma jornada de devoção para buscar e levantar o mastro, simbolizando a identidade e a resistência cultural do povo nordestino . O evento, que ocorre em junho, chegou a receber grandes nomes da música, como Xand Avião, e teve seu valor reconhecido nacionalmente pela Câmara dos Deputados . Além desse grande festejo, Capela também recebe projetos como o \"Cultura em Toda Parte\", que democratiza o acesso à arte . Nessa iniciativa, a Praça Cônego José Mota Cabral e a Paróquia Nossa Senhora da Purificação se enchem de vida com feiras de artesanato, literatura, concertos da Orquestra Sinfônica de Sergipe e apresentações de reisado . Esses eventos reforçam o compromisso de Capela em manter vivas suas expressões artísticas e fortalecer os laços comunitários.</p>', 'published', '2026-03-01 07:52:00', '2026-03-01 11:52:43', '2026-03-04 16:09:49', 0, 0, 0, 'confirmado', 'uploads/posts/2026/03/post-3/capa/2a879a583da8f1d3127a149e0181cb62.png', 'festival,agenda', 3, 226, '2026-03-06', '18:00:00', 'Praça Central', 'Centro - Capela', '#98EBE6', 'Fofoca quente e exclusiva, os bastidores das festas e os flagras que ninguém mais viu! 👀\ngenda social completa, aniversários, casamentos e eventos badalados para você marcar presença. 📅\nQuem é quem na cidade, saiba por onde anda a sociedade e o pessoal que faz a cena social acontecer. 🌟\nRevista social digital, os melhores cliques, looks e resumos de todas as festas em um só lugar. 📸'),
+(4, 2, 1, 'Agenda cultural: feira criativa no domingo', 'Artesanato, música e espaço para toda família', 'agenda-cultural-feira-criativa-no-domingo', '<p>A feira criativa será realizada no bairro Eldorado com atrações ao longo do dia.</p>', 'published', '2026-03-01 04:52:43', '2026-03-01 11:52:43', '2026-03-01 12:39:19', 0, 0, 0, 'rumor', 'img/foto29.jpg', 'agenda,cultura', 2, 81, '2026-03-08', '09:00:00', 'Espaço Eldorado', 'Eldorado - Capela', '#FFFFFF', NULL),
+(5, 3, 1, 'Últimas: novo point gastronômico vira febre', 'Casa recém inaugurada lota no primeiro fim de semana', 'ultimas-novo-point-gastronomico-vira-febre', '<p>O novo point já entrou no radar da cidade e promete noites movimentadas.</p>', 'published', '2026-03-01 09:52:43', '2026-03-01 11:52:43', '2026-03-02 20:23:05', 0, 0, 0, 'rumor', 'img/foto28.jpg', 'gastronomia,babado', 2, 70, NULL, NULL, NULL, NULL, '#FFFFFF', NULL),
+(6, 3, 1, 'Últimas: celebridade regional passa pela cidade', 'A visita surpresa agitou fãs e curiosos na avenida principal', 'ultimas-celebridade-regional-passa-pela-cidade', '<p>A passagem rápida gerou vídeos e comentários nas redes sociais.</p>', 'published', '2026-03-01 10:52:43', '2026-03-01 11:52:43', '2026-03-03 15:57:58', 1, 0, 1, 'confirmado', 'img/foto27.jpg', 'celebridade,ultimas', 2, 305, NULL, NULL, NULL, NULL, '#FFFFFF', NULL),
+(7, 2, 1, 'Amistoso contra a equipe do Dorense', 'Jogo de história e rivalidade', 'amistoso-contra-a-equipe-do-dorense', 'Grande amistoso entre as equipes do Rio Branco x Dorense. O evento acontecerá em Capela, no estádio Jackson Alves de Carvalho (Rio Branco). No dia 08.03.2026 venha curtir uma tarde de espetáculo de futebol.', 'published', '2026-03-01 16:08:00', '2026-03-01 13:08:49', '2026-03-01 13:10:35', 1, 0, 0, 'confirmado', 'uploads/submissions/2026/03/sub-1/65daba6c6d73dcc21c562bfdcb698fdd.png', 'amistoso-rio-branco-dorense', 1, 0, '2026-03-08', '14:00:00', 'Rio Branco', 'Capela', '#FFFFFF', NULL),
+(8, 2, 1, 'Encontro Cultura da Cidade', 'Evento terá atrações regionais e praça gastronômica', 'festival-de-ver-ao-confirmado-para-s-abado-c-opia', '<p>O festival acontece no próximo sábado com início às 18h, entrada solidária e estrutura reforçada.</p>', 'published', '2026-03-01 18:56:00', '2026-03-01 20:10:43', '2026-03-03 16:02:46', 1, 0, 0, 'confirmado', 'uploads/posts/2026/03/post-8/capa/5b2fc7ad5f60a32c13035c726a522e94.jpg', 'festival,agenda', 3, 2, '2026-03-06', '18:00:00', 'Praça Central', 'Centro - Capela', '#FFFFFF', NULL),
+(9, 2, 1, 'Encontro de jornalistas em pró da liberdade', 'Contra o preconceito de gênero e cor', 'agenda-cultural-feira-criativa-no-domingo-c-opia', '<p>A feira criativa será realizada no bairro Eldorado com atrações ao longo do dia.</p>', 'published', '2026-03-01 19:25:00', '2026-03-01 20:11:47', '2026-03-03 16:03:05', 0, 0, 0, 'rumor', 'uploads/posts/2026/03/post-9/capa/d934f5e84713691ef604a32891528ce7.jpg', 'agenda,cultura', 2, 3, '2026-03-08', '09:00:00', 'Espaço Eldorado', 'Eldorado - Capela', '#FFFFFF', NULL),
+(10, 4, 1, 'Casal flagrado em atos obscenos!', 'Em plena praça pública, casal foi pego fazendo sabe o quê?', 'casal-flagrado-em-atos-obscenos', 'É isso mesmo que você está pensando, casal foi flagrado em plena praça pública fazendo sexo explícito, não pense que foi escondido, foi para todos verem e desfrutarem do momento. Que coisa, essa eu não esperava! Quem será esse casal?', 'published', '2026-03-01 20:38:14', '2026-03-01 20:38:14', '2026-03-02 20:05:00', 0, 0, 1, 'rumor', NULL, 'casal-flagra', 3, 27, NULL, '20:25:00', NULL, 'Praça pública', '#FFFFFF', NULL),
+(11, 4, 1, 'Bar da cidade na mira da lei', 'Verdade, certo bar na cidade que está na mira dos homens', 'casal-flagrado-em-atos-obscenos-copia', 'Sim! Isso está sendo apurado pelas minhas fontes que um certo bar da cidade está sendo monitorado pela venda de bebidas a menores. Cuidado gente! Isso é ilegal, NÃO PODE!', 'published', '2026-03-01 21:34:48', '2026-03-01 21:31:58', '2026-03-02 20:04:25', 0, 0, 0, 'rumor', NULL, 'na-mira, lei', 3, 1, NULL, '20:25:00', NULL, 'Cidade', '#FFFFFF', NULL),
+(12, 1, 1, 'Aniversário da Maju Leite', 'Festa grandiosa e elegante', 'festa-grandiosa', 'Foi um luxo a festa de aniversário da líndíssima Maju, só gente bonita e elegante presentes. Ela como sempre muito atendioca com todos, comemorou muito. Todos foram só elogios, festa para ficar na memória de todos. Parabéns Maju!', 'published', '2026-03-01 22:30:00', '2026-03-01 22:33:18', '2026-03-03 16:03:10', 0, 0, 0, 'confirmado', 'uploads/posts/2026/03/post-12/capa/f0d738cab132de17c2673938339a73d6.png', 'aniversario,vip', 2, 5, '2026-02-22', '19:00:00', 'Clube social Rio Branco', 'Aniversário', '#FFFFFF', NULL),
+(13, 4, 1, 'Casal flagrado em atos obscenos!', 'Gente não é mentira, foi fato, aconteceu na nossa cidade. Um certo casal conhecido na cidade foi pego fazendo aquilo em plena praça pública.', 'fofoca-rapida-1', '<p>Casal flagrado em atos obscenos!</p><p>Gente não é mentira, foi fato, aconteceu na nossa cidade. Um certo casal conhecido na cidade foi pego fazendo aquilo em plena praça pública.</p>', 'published', '2026-03-01 21:47:00', '2026-03-02 20:25:13', '2026-03-02 20:25:13', 0, 0, 0, 'rumor', NULL, NULL, 1, 0, NULL, NULL, NULL, NULL, '#FFFFFF', NULL),
+(14, 4, 1, 'Bar da cidade na mira da lei', 'Um certo bar da cidade está na mira da polícia, segundo informações apuradas ele estaria sendo espaço de prostituição, cuidado viu!', 'fofoca-rapida-2', '<p>Bar da cidade na mira da lei</p><p>Um certo bar da cidade está na mira da polícia, segundo informações apuradas ele estaria sendo espaço de prostituição, cuidado viu!</p>', 'published', '2026-03-01 21:48:00', '2026-03-02 20:25:13', '2026-03-03 15:57:32', 0, 0, 0, 'rumor', NULL, NULL, 1, 1, NULL, NULL, NULL, NULL, '#FFFFFF', NULL),
+(15, 4, 1, 'Amigos ou casal?', 'Será que aquela amizade entre os dois amigos se tornará um belo romance? Hum! As más línguas já estão comentando viu! Eu não sei de nada apenas ouço e reproduzo...', 'fofoca-rapida-3', '<p>Amigos ou casal?</p><p>Será que aquela amizade entre os dois amigos se tornará um belo romance? Hum! As más línguas já estão comentando viu! Eu não sei de nada apenas ouço e reproduzo...</p>', 'published', '2026-02-26 21:55:00', '2026-03-02 20:25:13', '2026-03-02 20:25:13', 0, 0, 0, 'rumor', NULL, NULL, 1, 0, NULL, NULL, NULL, NULL, '#FFFFFF', NULL),
+(16, 4, 1, 'Ferveu o aniversário do bofe!', 'Foi um show o aniversário de nosso amado \'Amando\' ele deu uma belíssima festa para os amigos e poucos convidados. Show!', 'fofoca-rapida-4', '<p>Ferveu o aniversário do bofe!</p><p>Foi um show o aniversário de nosso amado \'Amando\' ele deu uma belíssima festa para os amigos e poucos convidados. Show!</p>', 'published', '2026-03-01 21:57:00', '2026-03-02 20:25:13', '2026-03-02 20:25:13', 0, 0, 0, 'rumor', NULL, NULL, 1, 0, NULL, NULL, NULL, NULL, '#FFFFFF', NULL),
+(17, 4, 1, 'A gata mais disputada', 'Ela está sendo disputada por dois rapagões, quem será o dono do seu coração? Meninos sejam criativos, quem for mais e melhor, deverá ser o escolhido. Boa sorte aos três. rsrsrsrs', 'a-gata-mais-disputada', '<p>A gata mais disputada</p><p>Ela está sendo disputada por dois rapagões, quem será o dono do seu coração? Meninos sejam criativos, quem for mais e melhor, deverá ser o escolhido. Boa sorte aos três. rsrsrsrs</p>', 'published', '2026-03-01 22:00:00', '2026-03-02 20:25:13', '2026-03-04 14:45:20', 0, 0, 0, 'rumor', NULL, NULL, 1, 0, NULL, NULL, NULL, NULL, '#FFFFFF', NULL),
+(18, 4, 1, 'Encontro dos amigos', 'Deu ruim o encontro dos amigos no último dia 25/02 tudo parecia ir muito bem até um deles jogar cerveja na cara do outro, isso foi o estopim para uma briga generalizada. Nossa que feio!', 'fofoca-rapida-6', '<p>Encontro dos amigos</p><p>Deu ruim o encontro dos amigos no último dia 25/02 tudo parecia ir muito bem até um deles jogar cerveja na cara do outro, isso foi o estopim para uma briga generalizada. Nossa que feio!</p>', 'published', '2026-03-01 22:01:00', '2026-03-02 20:25:13', '2026-03-03 16:03:18', 0, 0, 0, 'rumor', NULL, NULL, 1, 6, NULL, NULL, NULL, NULL, '#FFFFFF', NULL),
+(20, 1, 1, 'BabadoVip! O Novo Point Virtual Onde a Sociedade Capelense se Encontra', 'Seja visto pela sociedade capelense', 'babadovip-o-novo-point-virtual-onde-a-sociedade-capelense-se-encontra', 'BabadoVip: O Novo Point Virtual Onde a Sociedade Capelense se Encontra 🌟\r\n\r\nJá imaginou um lugar onde você fica por dentro de tudo o que rola nos bastidores da sociedade de Capela? Agora isso é realidade! Acaba de entrar no ar o BabadoVip, o site que vai virar a sua fonte número um para saber das fofocas, festas e eventos sociais da cidade. Com uma proposta descontraída e moderna, a plataforma chega para conectar os capelenses de forma divertida, trazendo desde os flagras mais quentes das baladas até a cobertura completa dos grandes acontecimentos. No BabadoVip, você encontra uma agenda social recheada com aniversários, casamentos e encontros badalados, além de uma verdadeira revista social digital, repleta de fotos e resumos dos melhores momentos. Quer saber quem são os protagonistas da cena social e por onde eles andam? É lá! O site também dá voz aos bastidores, revelando histórias e aquele \"quem é quem\" que todo mundo adora comentar. E para ficar ainda mais completo, já traz na programação eventos como o \"Encontro de jornalistas em pró da liberdade\" e o tradicional amistoso contra o Dorense, mostrando que o esporte e a cultura também fazem parte desse universo. Acesse www.babadovip.free.nf e venha fazer parte desse point virtual. Afinal, em Capela, o babado é vip e você fica sabendo tudo em primeira mão!', 'published', '2026-03-04 16:00:00', '2026-03-04 16:14:35', '2026-03-04 16:16:42', 0, 0, 0, 'confirmado', NULL, 'babadovip,site,lancamento', 3, 0, NULL, NULL, NULL, NULL, '#BDE0EF', 'Fofoca quente e exclusiva, os bastidores das festas e os flagras que ninguém mais viu!\nAgenda social completa, aniversários, casamentos e eventos badalados para você marcar presença.\nQuem é quem na cidade, saiba por onde anda a sociedade e o pessoal que faz a cena social acontecer.\nRevista social digital, os melhores cliques, looks e resumos de todas as festas em um só lugar.\nSeja um luxo e acompanhe tudo por aqui. Lembre-se \"Quem não é visto, não é lembrado!\"');
 
 -- --------------------------------------------------------
 
@@ -325,8 +327,6 @@ INSERT INTO `post_fotos` (`id`, `post_id`, `arquivo`, `legenda`, `ordem`, `criad
 (2, 1, 'img/foto2.jpg', 'Tapete rosa', 1, '2026-03-01 11:52:43'),
 (3, 1, 'img/foto3.jpg', 'Convidados VIP', 2, '2026-03-01 11:52:43'),
 (4, 1, 'img/foto4.jpg', 'Show principal', 3, '2026-03-01 11:52:43'),
-(7, 3, 'img/foto7.jpg', 'Palco oficial', 0, '2026-03-01 11:52:43'),
-(8, 3, 'img/foto8.jpg', 'Área de alimentação', 1, '2026-03-01 11:52:43'),
 (9, 4, 'img/foto9.jpg', 'Artesanato local', 0, '2026-03-01 11:52:43'),
 (10, 5, 'img/foto10.jpg', 'Ambiente interno', 0, '2026-03-01 11:52:43'),
 (11, 6, 'img/foto11.jpg', 'Registros da visita', 0, '2026-03-01 11:52:43'),
@@ -339,7 +339,31 @@ INSERT INTO `post_fotos` (`id`, `post_id`, `arquivo`, `legenda`, `ordem`, `criad
 (48, 2, 'img/foto6.jpg', 'Noivo da debutante', 2, '2026-03-01 20:32:19'),
 (49, 2, 'uploads/posts/2026/03/post-2/galeria/f9e74b2b19b8903f19a8ef18befe4d40.jpg', 'Apresentadora da festa', 3, '2026-03-01 20:32:19'),
 (50, 2, 'uploads/posts/2026/03/post-2/galeria/7cb6b3e5214864529ace41e4f872be62.jpg', 'Irmão da debutante', 4, '2026-03-01 20:32:19'),
-(51, 2, 'uploads/posts/2026/03/post-2/galeria/04e748e95bf068b1c7e8dc3768410d37.jpg', 'Debutante fazendo bolo com a avó, sendo criativa na cozinha.', 5, '2026-03-01 20:32:19');
+(51, 2, 'uploads/posts/2026/03/post-2/galeria/04e748e95bf068b1c7e8dc3768410d37.jpg', 'Debutante fazendo bolo com a avó, sendo criativa na cozinha.', 5, '2026-03-01 20:32:19'),
+(144, 3, 'img/foto7.jpg', 'Palco oficial', 0, '2026-03-04 16:08:29'),
+(145, 3, 'img/foto8.jpg', 'Área de alimentação', 1, '2026-03-04 16:08:29'),
+(146, 3, 'uploads/posts/2026/03/post-3/galeria/cbb017fabab74b9c6278f60580e49f97.jpg', '', 2, '2026-03-04 16:08:29');
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `site_visits`
+--
+
+CREATE TABLE `site_visits` (
+  `id` int(11) NOT NULL,
+  `visit_date` date NOT NULL,
+  `total` int(11) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Despejando dados para a tabela `site_visits`
+--
+
+INSERT INTO `site_visits` (`id`, `visit_date`, `total`, `created_at`, `updated_at`) VALUES
+(1, '2026-03-04', 2, '2026-03-04 17:10:04', '2026-03-04 17:22:56');
 
 -- --------------------------------------------------------
 
@@ -492,6 +516,13 @@ ALTER TABLE `post_fotos`
   ADD KEY `idx_post_fotos_post_ordem` (`post_id`,`ordem`);
 
 --
+-- Índices de tabela `site_visits`
+--
+ALTER TABLE `site_visits`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_site_visits_date` (`visit_date`);
+
+--
 -- Índices de tabela `submissions`
 --
 ALTER TABLE `submissions`
@@ -547,7 +578,7 @@ ALTER TABLE `fofocas_rapidas`
 -- AUTO_INCREMENT de tabela `home_cards`
 --
 ALTER TABLE `home_cards`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT de tabela `home_secoes`
@@ -565,7 +596,7 @@ ALTER TABLE `login_attempts`
 -- AUTO_INCREMENT de tabela `posts`
 --
 ALTER TABLE `posts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT de tabela `post_comentarios`
@@ -577,7 +608,13 @@ ALTER TABLE `post_comentarios`
 -- AUTO_INCREMENT de tabela `post_fotos`
 --
 ALTER TABLE `post_fotos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=147;
+
+--
+-- AUTO_INCREMENT de tabela `site_visits`
+--
+ALTER TABLE `site_visits`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de tabela `submissions`

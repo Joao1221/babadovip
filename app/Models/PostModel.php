@@ -8,6 +8,7 @@ use PDO;
 final class PostModel extends BaseModel
 {
     private ?bool $hasOverlayTitleColorColumn = null;
+    private ?bool $hasHomeSubheadlinesColumn = null;
 
     public function generateUniqueSlug(string $title, ?int $ignoreId = null): string
     {
@@ -42,7 +43,22 @@ final class PostModel extends BaseModel
 
     public function create(array $data): int
     {
-        if ($this->hasOverlayTitleColorColumn()) {
+        $data['overlay_titulo_cor'] = $data['overlay_titulo_cor'] ?? '#FFFFFF';
+        $data['subchamadas_home'] = $data['subchamadas_home'] ?? null;
+
+        $hasOverlay = $this->hasOverlayTitleColorColumn();
+        $hasHomeSubheadlines = $this->hasHomeSubheadlinesColumn();
+
+        if ($hasOverlay && $hasHomeSubheadlines) {
+            $stmt = $this->pdo->prepare('INSERT INTO posts (
+                categoria_id, autor_admin_id, titulo, subtitulo, slug, conteudo_html, status, publicado_em,
+                is_breaking, is_exclusivo, is_vip, verificacao, imagem_capa, tags, tempo_leitura, event_data, event_hora, event_local, event_bairro_cidade, overlay_titulo_cor, subchamadas_home
+            ) VALUES (
+                :categoria_id, :autor_admin_id, :titulo, :subtitulo, :slug, :conteudo_html, :status, :publicado_em,
+                :is_breaking, :is_exclusivo, :is_vip, :verificacao, :imagem_capa, :tags, :tempo_leitura, :event_data, :event_hora, :event_local, :event_bairro_cidade, :overlay_titulo_cor, :subchamadas_home
+            )');
+        } elseif ($hasOverlay) {
+            unset($data['subchamadas_home']);
             $stmt = $this->pdo->prepare('INSERT INTO posts (
                 categoria_id, autor_admin_id, titulo, subtitulo, slug, conteudo_html, status, publicado_em,
                 is_breaking, is_exclusivo, is_vip, verificacao, imagem_capa, tags, tempo_leitura, event_data, event_hora, event_local, event_bairro_cidade, overlay_titulo_cor
@@ -50,8 +66,18 @@ final class PostModel extends BaseModel
                 :categoria_id, :autor_admin_id, :titulo, :subtitulo, :slug, :conteudo_html, :status, :publicado_em,
                 :is_breaking, :is_exclusivo, :is_vip, :verificacao, :imagem_capa, :tags, :tempo_leitura, :event_data, :event_hora, :event_local, :event_bairro_cidade, :overlay_titulo_cor
             )');
+        } elseif ($hasHomeSubheadlines) {
+            unset($data['overlay_titulo_cor']);
+            $stmt = $this->pdo->prepare('INSERT INTO posts (
+                categoria_id, autor_admin_id, titulo, subtitulo, slug, conteudo_html, status, publicado_em,
+                is_breaking, is_exclusivo, is_vip, verificacao, imagem_capa, tags, tempo_leitura, event_data, event_hora, event_local, event_bairro_cidade, subchamadas_home
+            ) VALUES (
+                :categoria_id, :autor_admin_id, :titulo, :subtitulo, :slug, :conteudo_html, :status, :publicado_em,
+                :is_breaking, :is_exclusivo, :is_vip, :verificacao, :imagem_capa, :tags, :tempo_leitura, :event_data, :event_hora, :event_local, :event_bairro_cidade, :subchamadas_home
+            )');
         } else {
             unset($data['overlay_titulo_cor']);
+            unset($data['subchamadas_home']);
             $stmt = $this->pdo->prepare('INSERT INTO posts (
                 categoria_id, autor_admin_id, titulo, subtitulo, slug, conteudo_html, status, publicado_em,
                 is_breaking, is_exclusivo, is_vip, verificacao, imagem_capa, tags, tempo_leitura, event_data, event_hora, event_local, event_bairro_cidade
@@ -67,7 +93,24 @@ final class PostModel extends BaseModel
     public function update(int $id, array $data): void
     {
         $data['id'] = $id;
-        if ($this->hasOverlayTitleColorColumn()) {
+        $data['overlay_titulo_cor'] = $data['overlay_titulo_cor'] ?? '#FFFFFF';
+        $data['subchamadas_home'] = $data['subchamadas_home'] ?? null;
+
+        $hasOverlay = $this->hasOverlayTitleColorColumn();
+        $hasHomeSubheadlines = $this->hasHomeSubheadlinesColumn();
+
+        if ($hasOverlay && $hasHomeSubheadlines) {
+            $stmt = $this->pdo->prepare('UPDATE posts SET
+                categoria_id = :categoria_id, autor_admin_id = :autor_admin_id, titulo = :titulo, subtitulo = :subtitulo, slug = :slug,
+                conteudo_html = :conteudo_html, status = :status, publicado_em = :publicado_em,
+                is_breaking = :is_breaking, is_exclusivo = :is_exclusivo, is_vip = :is_vip, verificacao = :verificacao,
+                imagem_capa = :imagem_capa, tags = :tags, tempo_leitura = :tempo_leitura,
+                event_data = :event_data, event_hora = :event_hora, event_local = :event_local, event_bairro_cidade = :event_bairro_cidade,
+                overlay_titulo_cor = :overlay_titulo_cor, subchamadas_home = :subchamadas_home,
+                atualizado_em = NOW()
+                WHERE id = :id');
+        } elseif ($hasOverlay) {
+            unset($data['subchamadas_home']);
             $stmt = $this->pdo->prepare('UPDATE posts SET
                 categoria_id = :categoria_id, autor_admin_id = :autor_admin_id, titulo = :titulo, subtitulo = :subtitulo, slug = :slug,
                 conteudo_html = :conteudo_html, status = :status, publicado_em = :publicado_em,
@@ -77,8 +120,20 @@ final class PostModel extends BaseModel
                 overlay_titulo_cor = :overlay_titulo_cor,
                 atualizado_em = NOW()
                 WHERE id = :id');
+        } elseif ($hasHomeSubheadlines) {
+            unset($data['overlay_titulo_cor']);
+            $stmt = $this->pdo->prepare('UPDATE posts SET
+                categoria_id = :categoria_id, autor_admin_id = :autor_admin_id, titulo = :titulo, subtitulo = :subtitulo, slug = :slug,
+                conteudo_html = :conteudo_html, status = :status, publicado_em = :publicado_em,
+                is_breaking = :is_breaking, is_exclusivo = :is_exclusivo, is_vip = :is_vip, verificacao = :verificacao,
+                imagem_capa = :imagem_capa, tags = :tags, tempo_leitura = :tempo_leitura,
+                event_data = :event_data, event_hora = :event_hora, event_local = :event_local, event_bairro_cidade = :event_bairro_cidade,
+                subchamadas_home = :subchamadas_home,
+                atualizado_em = NOW()
+                WHERE id = :id');
         } else {
             unset($data['overlay_titulo_cor']);
+            unset($data['subchamadas_home']);
             $stmt = $this->pdo->prepare('UPDATE posts SET
                 categoria_id = :categoria_id, autor_admin_id = :autor_admin_id, titulo = :titulo, subtitulo = :subtitulo, slug = :slug,
                 conteudo_html = :conteudo_html, status = :status, publicado_em = :publicado_em,
@@ -101,6 +156,18 @@ final class PostModel extends BaseModel
         $stmt->execute();
         $this->hasOverlayTitleColorColumn = ((int) $stmt->fetchColumn()) > 0;
         return $this->hasOverlayTitleColorColumn;
+    }
+
+    private function hasHomeSubheadlinesColumn(): bool
+    {
+        if ($this->hasHomeSubheadlinesColumn !== null) {
+            return $this->hasHomeSubheadlinesColumn;
+        }
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM information_schema.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'posts' AND COLUMN_NAME = 'subchamadas_home'");
+        $stmt->execute();
+        $this->hasHomeSubheadlinesColumn = ((int) $stmt->fetchColumn()) > 0;
+        return $this->hasHomeSubheadlinesColumn;
     }
 
     public function findById(int $id): ?array

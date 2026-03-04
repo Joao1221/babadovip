@@ -1,6 +1,7 @@
 <?php use App\Core\Csrf; $isEdit = is_array($post); ?>
 <?php $selectedCategoryId = (int) ($post['categoria_id'] ?? 0); ?>
 <?php $statusLabels = ['draft' => 'Rascunho', 'published' => 'Publicado', 'scheduled' => 'Agendado']; ?>
+<?php $coverImagePath = (string) ($post['imagem_capa'] ?? ''); ?>
 <section class="section-head">
     <h1><?= $isEdit ? 'Editar Matéria #' . (int) $post['id'] : 'Nova Matéria' ?></h1>
     <a class="btn-small" href="<?= e(url('/admin/posts')) ?>">Voltar</a>
@@ -18,13 +19,18 @@
 <form method="post" enctype="multipart/form-data" class="grid-form" action="<?= e($isEdit ? url('/admin/posts/' . $post['id'] . '/editar') : url('/admin/posts')) ?>">
     <?= Csrf::field() ?>
     <label>Título
-        <input type="text" name="titulo" maxlength="180" required value="<?= e((string) ($post['titulo'] ?? '')) ?>">
+        <input type="text" name="titulo" maxlength="500" required value="<?= e((string) ($post['titulo'] ?? '')) ?>">
+        <small class="muted">Para quebrar linha no titulo exibido, use &lt;br&gt;.</small>
     </label>
     <label>Slug
         <input type="text" name="slug" maxlength="190" value="<?= e((string) ($post['slug'] ?? '')) ?>">
     </label>
     <label>Subtítulo/Lead
         <input type="text" name="subtitulo" maxlength="255" value="<?= e((string) ($post['subtitulo'] ?? '')) ?>">
+    </label>
+    <label class="full">Subchamadas da chamada principal (ate 5, uma por linha)
+        <textarea name="subchamadas_home" rows="5" maxlength="1400" placeholder="Linha 1&#10;Linha 2&#10;Linha 3&#10;Linha 4&#10;Linha 5"><?= e((string) ($post['subchamadas_home'] ?? '')) ?></textarea>
+        <small class="muted">Use este bloco para o card principal sem imagem. Apenas o titulo principal sera clicavel.</small>
     </label>
     <label>Categoria
         <select name="categoria_id" required>
@@ -100,16 +106,22 @@
     <label class="full">Imagem de capa
         <input type="file" name="imagem_capa" accept=".jpg,.jpeg,.png,.webp">
     </label>
+    <?php if ($coverImagePath !== ''): ?>
+    <label class="full check">
+        <input type="checkbox" name="remover_imagem_capa" value="1" id="removerImagemCapa">
+        <span>Remover imagem de capa atual</span>
+    </label>
+    <?php endif; ?>
     <div class="full">
         <div
             id="coverPreviewCard"
-            class="cover-preview-card <?= empty($post['imagem_capa']) ? 'is-hidden' : '' ?>"
-            <?= !empty($post['imagem_capa']) ? 'data-original-src="' . e(url($post['imagem_capa'])) . '"' : '' ?>
+            class="cover-preview-card <?= $coverImagePath === '' ? 'is-hidden' : '' ?>"
+            <?= $coverImagePath !== '' ? 'data-original-src="' . e(url($coverImagePath)) . '"' : '' ?>
         >
             <img
                 id="coverPreviewImage"
                 class="preview-cover"
-                src="<?= !empty($post['imagem_capa']) ? e(url($post['imagem_capa'])) : '' ?>"
+                src="<?= $coverImagePath !== '' ? e(url($coverImagePath)) : '' ?>"
                 alt="Prévia da capa"
             >
             <small class="muted">Prévia da imagem de capa (sem comentário).</small>

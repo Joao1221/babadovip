@@ -5,13 +5,20 @@ namespace App\Models;
 
 final class HomeCardModel extends BaseModel
 {
+    private ?bool $hasOverlayTitleColorColumn = null;
+    private ?bool $hasHomeSubheadlinesColumn = null;
+
     public function listBySection(int $sectionId, bool $onlyPublic = false): array
     {
-        $sql = 'SELECT hc.*, p.titulo, p.slug, p.status, p.imagem_capa, p.criado_em, p.publicado_em, c.nome categoria_nome
+        $overlaySelect = $this->hasOverlayTitleColorColumn() ? 'p.overlay_titulo_cor' : "'#FFFFFF' AS overlay_titulo_cor";
+        $subheadlinesSelect = $this->hasHomeSubheadlinesColumn() ? 'p.subchamadas_home' : 'NULL AS subchamadas_home';
+
+        $sql = "SELECT hc.*, p.titulo, p.subtitulo, p.slug, p.status, p.imagem_capa, p.criado_em, p.publicado_em,
+                p.event_local, p.event_bairro_cidade, {$overlaySelect}, {$subheadlinesSelect}, c.nome categoria_nome
             FROM home_cards hc
             INNER JOIN posts p ON p.id = hc.post_id
             LEFT JOIN categorias c ON c.id = p.categoria_id
-            WHERE hc.secao_id = :sid';
+            WHERE hc.secao_id = :sid";
         if ($onlyPublic) {
             $sql .= " AND (p.status = 'published' OR (p.status = 'scheduled' AND p.publicado_em <= NOW()))";
         }
@@ -49,5 +56,29 @@ final class HomeCardModel extends BaseModel
     {
         $stmt = $this->pdo->prepare('DELETE FROM home_cards WHERE secao_id = :sid AND posicao = :pos');
         $stmt->execute(['sid' => $sectionId, 'pos' => $position]);
+    }
+
+    private function hasOverlayTitleColorColumn(): bool
+    {
+        if ($this->hasOverlayTitleColorColumn !== null) {
+            return $this->hasOverlayTitleColorColumn;
+        }
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM information_schema.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'posts' AND COLUMN_NAME = 'overlay_titulo_cor'");
+        $stmt->execute();
+        $this->hasOverlayTitleColorColumn = ((int) $stmt->fetchColumn()) > 0;
+        return $this->hasOverlayTitleColorColumn;
+    }
+
+    private function hasHomeSubheadlinesColumn(): bool
+    {
+        if ($this->hasHomeSubheadlinesColumn !== null) {
+            return $this->hasHomeSubheadlinesColumn;
+        }
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM information_schema.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'posts' AND COLUMN_NAME = 'subchamadas_home'");
+        $stmt->execute();
+        $this->hasHomeSubheadlinesColumn = ((int) $stmt->fetchColumn()) > 0;
+        return $this->hasHomeSubheadlinesColumn;
     }
 }

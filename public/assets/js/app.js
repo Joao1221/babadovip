@@ -48,12 +48,18 @@
   const coverInput = document.querySelector('input[type="file"][name="imagem_capa"]');
   const coverCard = document.getElementById("coverPreviewCard");
   const coverImage = document.getElementById("coverPreviewImage");
+  const removeCoverCheckbox = document.getElementById("removerImagemCapa");
   if (coverInput && coverCard && coverImage) {
-    coverInput.addEventListener("change", () => {
+    const syncCoverPreview = () => {
       const file = (coverInput.files || [])[0];
       if (file) {
         coverImage.src = URL.createObjectURL(file);
         coverCard.classList.remove("is-hidden");
+        return;
+      }
+      if (removeCoverCheckbox && removeCoverCheckbox.checked) {
+        coverImage.src = "";
+        coverCard.classList.add("is-hidden");
         return;
       }
       const originalSrc = coverCard.getAttribute("data-original-src") || "";
@@ -64,7 +70,23 @@
         coverImage.src = "";
         coverCard.classList.add("is-hidden");
       }
+    };
+
+    coverInput.addEventListener("change", () => {
+      if ((coverInput.files || []).length > 0 && removeCoverCheckbox) {
+        removeCoverCheckbox.checked = false;
+      }
+      syncCoverPreview();
     });
+
+    if (removeCoverCheckbox) {
+      removeCoverCheckbox.addEventListener("change", () => {
+        if (removeCoverCheckbox.checked) {
+          coverInput.value = "";
+        }
+        syncCoverPreview();
+      });
+    }
   }
 
   const galleryList = document.getElementById("galleryList");

@@ -20,6 +20,8 @@ final class PublicController extends BaseController
 
         $sections = $sectionsModel->all();
         $result = [];
+        $principalPostId = $this->resolvePrincipalPostId($sections, $cardsModel, $postModel);
+        $globalSeenPostIds = [];
         $gossipItems = array_map(static function (array $fofoca): array {
             $url = !empty($fofoca['post_slug'])
                 ? url('/materia/' . $fofoca['post_slug'])
@@ -36,36 +38,13 @@ final class PublicController extends BaseController
             if (($section['slug'] ?? '') === 'ultimas') {
                 continue;
             }
-            $manualCards = $cardsModel->listBySection((int) $section['id'], true);
-            $limit = max(1, (int) $section['limite_cards']);
-            if (($section['slug'] ?? '') === 'sociedade-festas') {
-                $limit = max($limit, 7);
-            } elseif (($section['slug'] ?? '') === 'eventos-agenda') {
-                $limit = max($limit, 9);
+            $excludeIds = array_keys($globalSeenPostIds);
+            if ($principalPostId > 0 && ($section['slug'] ?? '') !== 'sociedade-festas') {
+                $excludeIds[] = $principalPostId;
             }
-            $mode = $section['modo'];
-            $categoryId = (int) ($section['categoria_id'] ?? 0);
 
-            $posts = [];
-            $manualPostIds = array_map(static fn(array $c): int => (int) $c['post_id'], $manualCards);
-            if ($mode === 'manual') {
-                $posts = array_slice($manualCards, 0, $limit);
-            } elseif ($mode === 'misto') {
-                $fixedLimit = (($section['slug'] ?? '') === 'sociedade-festas') ? min(7, $limit) : min(3, $limit);
-                $fixed = array_slice($manualCards, 0, $fixedLimit);
-                $posts = $fixed;
-                $need = $limit - count($fixed);
-                if ($need > 0 && $categoryId > 0) {
-                    $auto = $postModel->latestByCategory($categoryId, $need, $manualPostIds);
-                    $posts = array_merge($posts, $auto);
-                }
-            } else {
-                if ($section['slug'] === 'ultimas') {
-                    $posts = $postModel->latest($limit);
-                } elseif ($categoryId > 0) {
-                    $posts = $postModel->latestByCategory($categoryId, $limit);
-                }
-            }
+            $posts = $this->resolveSectionPosts($section, $cardsModel, $postModel, $excludeIds);
+            $posts = $this->dedupeAndTrackPosts($posts, $globalSeenPostIds);
 
             $result[] = [
                 'meta' => $section,
@@ -78,6 +57,101 @@ final class PublicController extends BaseController
             'sections' => $result,
             'gossipItems' => $gossipItems,
         ]);
+    }
+
+    private function resolvePrincipalPostId(array $sections, HomeCardModel $cardsModel, PostModel $postModel): int
+    {
+        foreach ($sections as $section) {
+            if (($section['slug'] ?? '') !== 'sociedade-festas') {
+                continue;
+            }
+            $posts = $this->resolveSectionPosts($section, $cardsModel, $postModel);
+            return $this->extractPostId($posts[0] ?? null);
+        }
+        return 0;
+    }
+
+    private function resolveSectionPosts(
+        array $section,
+        HomeCardModel $cardsModel,
+        PostModel $postModel,
+        array $excludeIds = []
+    ): array {
+        $exclude = array_values(array_filter(array_map('intval', $excludeIds), static fn(int $id): bool => $id > 0));
+        $excludeMap = [];
+        foreach ($exclude as $id) {
+            $excludeMap[$id] = true;
+        }
+
+        $manualCards = $cardsModel->listBySection((int) $section['id'], true);
+        if ($excludeMap !== []) {
+            $manualCards = array_values(array_filter($manualCards, function (array $card) use ($excludeMap): bool {
+                $postId = (int) ($card['post_id'] ?? 0);
+                return $postId <= 0 || !isset($excludeMap[$postId]);
+            }));
+        }
+
+        $limit = max(1, (int) ($section['limite_cards'] ?? 1));
+        if (($section['slug'] ?? '') === 'sociedade-festas') {
+            $limit = max($limit, 7);
+        } elseif (($section['slug'] ?? '') === 'eventos-agenda') {
+            $limit = max($limit, 9);
+        }
+        $mode = $section['modo'] ?? 'auto';
+        $categoryId = (int) ($section['categoria_id'] ?? 0);
+        $manualPostIds = array_map(static fn(array $c): int => (int) $c['post_id'], $manualCards);
+        $queryExcludeIds = array_values(array_unique(array_merge($manualPostIds, $exclude)));
+
+        if ($mode === 'manual') {
+            return array_slice($manualCards, 0, $limit);
+        }
+        if ($mode === 'misto') {
+            $fixedLimit = (($section['slug'] ?? '') === 'sociedade-festas') ? min(7, $limit) : min(3, $limit);
+            $fixed = array_slice($manualCards, 0, $fixedLimit);
+            $posts = $fixed;
+            $need = $limit - count($fixed);
+            if ($need > 0 && $categoryId > 0) {
+                $auto = $postModel->latestByCategory($categoryId, $need, $queryExcludeIds);
+                $posts = array_merge($posts, $auto);
+            }
+            return $posts;
+        }
+        if ($categoryId > 0) {
+            return $postModel->latestByCategory($categoryId, $limit, $exclude);
+        }
+        return [];
+    }
+
+    private function extractPostId(mixed $post): int
+    {
+        if (!is_array($post)) {
+            return 0;
+        }
+        $postId = (int) ($post['post_id'] ?? 0);
+        if ($postId > 0) {
+            return $postId;
+        }
+        return (int) ($post['id'] ?? 0);
+    }
+
+    private function dedupeAndTrackPosts(array $posts, array &$globalSeenPostIds): array
+    {
+        $sectionSeenPostIds = [];
+        $result = [];
+
+        foreach ($posts as $post) {
+            $postId = $this->extractPostId($post);
+            if ($postId > 0) {
+                if (isset($globalSeenPostIds[$postId]) || isset($sectionSeenPostIds[$postId])) {
+                    continue;
+                }
+                $sectionSeenPostIds[$postId] = true;
+                $globalSeenPostIds[$postId] = true;
+            }
+            $result[] = $post;
+        }
+
+        return $result;
     }
 
     public function fofocas(): void

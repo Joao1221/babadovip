@@ -20,15 +20,41 @@
                     <?php $thirdRow = array_slice($posts, 4, 3); ?>
                     <?php if ($main): ?>
                         <?php $headlineColor = (isset($main['overlay_titulo_cor']) && preg_match('/^#[0-9A-Fa-f]{6}$/', (string) $main['overlay_titulo_cor'])) ? (string) $main['overlay_titulo_cor'] : '#FFFFFF'; ?>
-                        <article class="card card-principal">
-                            <?php if (!empty($main['imagem_capa'])): ?>
+                        <?php
+                            $mainSubheadlines = [];
+                            $subheadlinesRaw = trim((string) ($main['subchamadas_home'] ?? ''));
+                            if ($subheadlinesRaw !== '') {
+                                $lines = preg_split('/\R/u', $subheadlinesRaw) ?: [];
+                                foreach ($lines as $line) {
+                                    $clean = trim((string) $line);
+                                    if ($clean === '') {
+                                        continue;
+                                    }
+                                    $mainSubheadlines[] = $clean;
+                                    if (count($mainSubheadlines) >= 5) {
+                                        break;
+                                    }
+                                }
+                            }
+                            $isTextOnlyMain = empty($main['imagem_capa']);
+                        ?>
+                        <article class="card card-principal <?= $isTextOnlyMain ? 'card-principal-text' : '' ?>">
+                            <?php if (!$isTextOnlyMain && !empty($main['imagem_capa'])): ?>
                                 <a href="<?= e(url('/materia/' . $main['slug'])) ?>">
                                     <img loading="lazy" src="<?= e(url($main['imagem_capa'])) ?>" alt="<?= e($main['titulo']) ?>">
                                 </a>
                             <?php endif; ?>
-                            <div class="card-body card-principal-overlay">
-                                <h3><a href="<?= e(url('/materia/' . $main['slug'])) ?>" style="color: <?= e($headlineColor) ?>;"><?= e($main['titulo']) ?></a></h3>
-                                <?php if (!empty($main['subtitulo'])): ?><p><?= e($main['subtitulo']) ?></p><?php endif; ?>
+                            <div class="card-body card-principal-overlay <?= $isTextOnlyMain ? 'card-principal-overlay-text' : '' ?>">
+                                <h3 class="<?= $isTextOnlyMain ? 'principal-text-title' : '' ?>"><a href="<?= e(url('/materia/' . $main['slug'])) ?>" style="color: <?= e($headlineColor) ?>;"><?= e_with_br($main['titulo']) ?></a></h3>
+                                <?php if ($mainSubheadlines): ?>
+                                    <ul class="principal-subcalls">
+                                        <?php foreach ($mainSubheadlines as $subheadline): ?>
+                                            <li><?= e($subheadline) ?></li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                <?php elseif (!empty($main['subtitulo'])): ?>
+                                    <p><?= e($main['subtitulo']) ?></p>
+                                <?php endif; ?>
                             </div>
                         </article>
                     <?php endif; ?>

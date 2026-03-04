@@ -47,6 +47,8 @@ Se o banco já existe de versão anterior, rode também:
 ```sql
 SOURCE database/migrations/20260301_add_overlay_titulo_cor.sql;
 SOURCE database/migrations/20260301_create_contact_messages.sql;
+SOURCE database/migrations/20260304_add_posts_subchamadas_home.sql;
+SOURCE database/migrations/20260304_expand_posts_titulo_length.sql;
 ```
 
 ## Executar

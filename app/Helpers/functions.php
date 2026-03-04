@@ -20,6 +20,14 @@ function e(?string $value): string
     return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
+function e_with_br(?string $value): string
+{
+    $normalized = str_replace(["\r\n", "\r"], "\n", (string) $value);
+    $parts = preg_split('/(?:<br\s*\/?>|\n)/iu', $normalized) ?: [];
+    $escaped = array_map(static fn(string $part): string => e($part), $parts);
+    return implode('<br>', $escaped);
+}
+
 function url(string $path = ''): string
 {
     return rtrim((string) config('app.url'), '/') . '/' . ltrim($path, '/');

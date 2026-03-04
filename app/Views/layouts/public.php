@@ -23,8 +23,11 @@
 <body>
 <header class="site-header">
     <div class="container">
-        <a href="<?= e(url('/')) ?>" class="brand">
-            <span class="brand-babado">Babado</span><span class="brand-vip">Vip</span>
+        <a href="<?= e(url('/')) ?>" class="brand brand-site">
+            <span class="brand-main">
+                <span class="brand-babado">Babado</span><span class="brand-vip">Vip</span>
+            </span>
+            <span class="brand-tagline">Seu point &eacute; aqui!</span>
         </a>
         <button type="button" class="menu-toggle" aria-label="Abrir menu" aria-controls="siteMenu" aria-expanded="false">☰</button>
         <?php

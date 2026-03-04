@@ -119,15 +119,17 @@ final class PostController extends BaseController
         }
 
         $title = trim((string) ($_POST['titulo'] ?? ''));
+        $titleForSlug = trim((string) preg_replace('/<br\s*\/?>/i', ' ', $title));
         $slug = trim((string) ($_POST['slug'] ?? ''));
         if ($slug === '') {
-            $slug = $postModel->generateUniqueSlug($title, $id);
+            $slug = $postModel->generateUniqueSlug($titleForSlug !== '' ? $titleForSlug : $title, $id);
         } else {
             $slug = $postModel->generateUniqueSlug($slug, $id);
         }
         $status = in_array(($_POST['status'] ?? ''), ['draft', 'published', 'scheduled'], true) ? $_POST['status'] : 'draft';
         $publishedAt = trim((string) ($_POST['publicado_em'] ?? '')) ?: null;
         $content = $this->sanitizeRichText((string) ($_POST['conteudo_html'] ?? ''));
+        $homeSubheadlines = $this->sanitizeHomeSubheadlines((string) ($_POST['subchamadas_home'] ?? ''));
         $overlayTitleColor = strtoupper(trim((string) ($_POST['overlay_titulo_cor'] ?? '#FFFFFF')));
         if (!preg_match('/^#[0-9A-F]{6}$/', $overlayTitleColor)) {
             $overlayTitleColor = '#FFFFFF';
@@ -138,7 +140,11 @@ final class PostController extends BaseController
             redirect($id ? '/admin/posts/' . $id . '/editar' : '/admin/posts/novo');
         }
 
+        $removeCover = isset($_POST['remover_imagem_capa']) && (string) $_POST['remover_imagem_capa'] === '1';
         $coverPath = $existingPost['imagem_capa'] ?? null;
+        if ($removeCover) {
+            $coverPath = null;
+        }
         if (isset($_FILES['imagem_capa']) && ($_FILES['imagem_capa']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
             $tmpFolder = PUBLIC_PATH . '/uploads/tmp/capa-' . date('YmdHis') . '-' . bin2hex(random_bytes(3));
             $saved = $uploadService->processMultiple($_FILES['imagem_capa'], $tmpFolder, 1);
@@ -167,6 +173,7 @@ final class PostController extends BaseController
             'event_hora' => trim((string) ($_POST['event_hora'] ?? '')) ?: null,
             'event_local' => trim((string) ($_POST['event_local'] ?? '')) ?: null,
             'event_bairro_cidade' => trim((string) ($_POST['event_bairro_cidade'] ?? '')) ?: null,
+            'subchamadas_home' => $homeSubheadlines,
             'overlay_titulo_cor' => $overlayTitleColor,
         ];
         if ($id) {
@@ -245,6 +252,26 @@ final class PostController extends BaseController
         return array_values($result);
     }
 
+    private function sanitizeHomeSubheadlines(string $raw): ?string
+    {
+        $lines = preg_split('/\R/u', $raw) ?: [];
+        $result = [];
+        foreach ($lines as $line) {
+            $clean = trim((string) preg_replace('/\s+/u', ' ', (string) $line));
+            if ($clean === '') {
+                continue;
+            }
+            $result[] = mb_substr($clean, 0, 255);
+            if (count($result) >= 5) {
+                break;
+            }
+        }
+        if ($result === []) {
+            return null;
+        }
+        return implode("\n", $result);
+    }
+
     public function duplicate(string $id): void
     {
         Auth::requireAdmin();
@@ -277,6 +304,7 @@ final class PostController extends BaseController
             'event_hora' => $post['event_hora'],
             'event_local' => $post['event_local'],
             'event_bairro_cidade' => $post['event_bairro_cidade'],
+            'subchamadas_home' => $post['subchamadas_home'] ?? null,
             'overlay_titulo_cor' => $post['overlay_titulo_cor'] ?? '#FFFFFF',
         ]);
         $photoModel->replaceForPost($newId, $photoModel->listByPost((int) $id));
