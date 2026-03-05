@@ -212,6 +212,73 @@
     updateOrders();
   }
 
+  const shareButtons = document.querySelectorAll("[data-share-url]");
+  if (shareButtons.length) {
+    const copyText = async (text) => {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "readonly");
+      textarea.style.position = "absolute";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+    };
+
+    shareButtons.forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const shareUrl = btn.getAttribute("data-share-url") || "";
+        const shareTitle = btn.getAttribute("data-share-title") || document.title;
+        const feedbackId = btn.getAttribute("data-share-feedback") || "";
+        const feedback = feedbackId ? document.getElementById(feedbackId) : null;
+        const setFeedback = (message, isError = false) => {
+          if (!feedback) return;
+          feedback.textContent = message;
+          feedback.style.color = isError ? "#ffb4c8" : "#9fe3ac";
+          const existingTimer = Number(feedback.dataset.timerId || "0");
+          if (existingTimer > 0) {
+            window.clearTimeout(existingTimer);
+          }
+          const timerId = window.setTimeout(() => {
+            feedback.textContent = "";
+            feedback.dataset.timerId = "0";
+          }, 2800);
+          feedback.dataset.timerId = String(timerId);
+        };
+
+        if (!shareUrl) return;
+
+        if (typeof navigator.share === "function") {
+          try {
+            await navigator.share({
+              title: shareTitle,
+              text: shareTitle,
+              url: shareUrl,
+            });
+            setFeedback("Compartilhado.");
+            return;
+          } catch (error) {
+            if (error && error.name === "AbortError") {
+              return;
+            }
+          }
+        }
+
+        try {
+          await copyText(shareUrl);
+          setFeedback("Link copiado.");
+        } catch (error) {
+          setFeedback("Nao foi possivel copiar o link.", true);
+        }
+      });
+    });
+  }
+
   const commentField = document.querySelector('textarea[name="mensagem"]');
   if (commentField) {
     document.querySelectorAll("[data-emoji-insert]").forEach((btn) => {

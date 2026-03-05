@@ -2,6 +2,12 @@
 declare(strict_types=1);
 
 $envPath = BASE_PATH . '/.env';
+if (!is_file($envPath)) {
+    $fallbackPath = BASE_PATH . '/.env.web';
+    if (is_file($fallbackPath)) {
+        $envPath = $fallbackPath;
+    }
+}
 $env = [];
 
 if (is_file($envPath)) {

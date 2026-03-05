@@ -8,6 +8,7 @@ use App\Core\Flash;
 use App\Models\PostCommentModel;
 use App\Models\PostModel;
 use App\Models\PostPhotoModel;
+use App\Services\UploadService;
 
 final class PostController extends BaseController
 {
@@ -30,6 +31,9 @@ final class PostController extends BaseController
         $photos = $photoModel->listByPost((int) $post['id']);
         $allowComments = $this->allowsComments($post);
         $comments = $allowComments ? $commentModel->listApprovedByPost((int) $post['id']) : [];
+        $metaDescription = $this->buildMetaDescription($post);
+        $metaImage = $this->buildMetaImage($post, $photos);
+        $canonicalUrl = url('/materia/' . (string) $post['slug']);
 
         $this->render('public/post', [
             'title' => $post['titulo'] . ' - BabadoVip',
@@ -37,6 +41,11 @@ final class PostController extends BaseController
             'photos' => $photos,
             'allowComments' => $allowComments,
             'comments' => $comments,
+            'canonicalUrl' => $canonicalUrl,
+            'metaTitle' => trim((string) preg_replace('/\s+/u', ' ', strip_tags(str_ireplace(['<br />', '<br/>', '<br>'], ' ', (string) ($post['titulo'] ?? ''))))),
+            'metaDescription' => $metaDescription,
+            'metaImage' => $metaImage,
+            'metaType' => 'article',
         ]);
     }
 
@@ -83,5 +92,78 @@ final class PostController extends BaseController
     {
         $slug = (string) ($post['categoria_slug'] ?? '');
         return in_array($slug, self::COMMENTABLE_CATEGORY_SLUGS, true);
+    }
+
+    private function buildMetaDescription(array $post): string
+    {
+        $subtitle = trim((string) ($post['subtitulo'] ?? ''));
+        if ($subtitle !== '') {
+            return mb_substr($subtitle, 0, 200);
+        }
+
+        $plainContent = trim((string) preg_replace('/\s+/u', ' ', strip_tags((string) ($post['conteudo_html'] ?? ''))));
+        if ($plainContent === '') {
+            return 'Leia a materia completa no BabadoVip.';
+        }
+        return mb_substr($plainContent, 0, 200);
+    }
+
+    private function buildMetaImage(array $post, array $photos): ?string
+    {
+        $imagePath = trim((string) ($post['imagem_capa'] ?? ''));
+        if ($imagePath === '' && !empty($photos[0]['arquivo'])) {
+            $imagePath = trim((string) $photos[0]['arquivo']);
+        }
+
+        $imagePath = str_replace('\\', '/', $imagePath);
+        if ($imagePath !== '' && preg_match('#^https?://#i', $imagePath) === 1) {
+            return $imagePath;
+        }
+
+        $imagePath = ltrim($imagePath, '/');
+        if (str_starts_with($imagePath, 'public/')) {
+            $imagePath = substr($imagePath, strlen('public/'));
+        }
+
+        if ($imagePath === '') {
+            $imagePath = 'img/babado-vip.png';
+        }
+
+        $socialPath = $this->resolveSocialMetaImage($imagePath);
+        if ($socialPath !== null) {
+            $imagePath = $socialPath;
+        }
+
+        return url($imagePath);
+    }
+
+    private function resolveSocialMetaImage(string $imagePath): ?string
+    {
+        $normalized = ltrim(str_replace('\\', '/', $imagePath), '/');
+        if (!str_starts_with($normalized, 'uploads/')) {
+            return null;
+        }
+
+        $sourceFullPath = PUBLIC_PATH . '/' . $normalized;
+        if (!is_file($sourceFullPath)) {
+            return null;
+        }
+
+        $socialFileName = 'social-' . pathinfo($sourceFullPath, PATHINFO_FILENAME) . '.jpg';
+        $socialFullPath = dirname($sourceFullPath) . '/' . $socialFileName;
+        if (!is_file($socialFullPath)) {
+            try {
+                (new UploadService())->createThumbnail($sourceFullPath, $socialFullPath, 1200);
+            } catch (\Throwable) {
+                return null;
+            }
+        }
+
+        if (!is_file($socialFullPath)) {
+            return null;
+        }
+
+        $socialRelativePath = str_replace('\\', '/', str_replace(PUBLIC_PATH . '/', '', $socialFullPath));
+        return $socialRelativePath !== '' ? $socialRelativePath : null;
     }
 }

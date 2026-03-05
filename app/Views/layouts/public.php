@@ -4,7 +4,66 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <?php
+        $metaTitle = trim((string) ($metaTitle ?? $title ?? 'BabadoVip'));
+        $metaDescription = trim((string) ($metaDescription ?? ''));
+        $metaImage = trim((string) ($metaImage ?? ''));
+        $metaType = trim((string) ($metaType ?? 'website'));
+        $canonicalUrl = trim((string) ($canonicalUrl ?? ''));
+        $metaImageMime = '';
+        $metaImageWidth = 0;
+        $metaImageHeight = 0;
+        if ($metaImage !== '') {
+            $metaImagePath = parse_url($metaImage, PHP_URL_PATH);
+            if (is_string($metaImagePath) && $metaImagePath !== '') {
+                $appBasePath = (string) (parse_url((string) config('app.url'), PHP_URL_PATH) ?? '');
+                if ($appBasePath !== '' && str_starts_with($metaImagePath, $appBasePath . '/')) {
+                    $metaImagePath = substr($metaImagePath, strlen($appBasePath));
+                } elseif ($appBasePath !== '' && $metaImagePath === $appBasePath) {
+                    $metaImagePath = '/';
+                }
+                $metaImageLocalPath = PUBLIC_PATH . '/' . ltrim($metaImagePath, '/');
+                if (is_file($metaImageLocalPath)) {
+                    $metaImageInfo = @getimagesize($metaImageLocalPath);
+                    if (is_array($metaImageInfo)) {
+                        $metaImageWidth = (int) ($metaImageInfo[0] ?? 0);
+                        $metaImageHeight = (int) ($metaImageInfo[1] ?? 0);
+                        $metaImageMime = (string) ($metaImageInfo['mime'] ?? '');
+                    }
+                }
+            }
+            if ($metaImageMime === '') {
+                $path = strtolower((string) (parse_url($metaImage, PHP_URL_PATH) ?? ''));
+                if (str_ends_with($path, '.png')) {
+                    $metaImageMime = 'image/png';
+                } elseif (str_ends_with($path, '.webp')) {
+                    $metaImageMime = 'image/webp';
+                } elseif (str_ends_with($path, '.jpg') || str_ends_with($path, '.jpeg')) {
+                    $metaImageMime = 'image/jpeg';
+                }
+            }
+        }
+    ?>
     <title><?= e($title ?? 'BabadoVip') ?></title>
+    <meta name="description" content="<?= e($metaDescription !== '' ? $metaDescription : 'Noticias, eventos e fofocas de Capela e regiao no BabadoVip.') ?>">
+    <?php if ($canonicalUrl !== ''): ?><link rel="canonical" href="<?= e($canonicalUrl) ?>"><?php endif; ?>
+    <meta property="og:site_name" content="BabadoVip">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:type" content="<?= e($metaType !== '' ? $metaType : 'website') ?>">
+    <meta property="og:title" content="<?= e($metaTitle !== '' ? $metaTitle : 'BabadoVip') ?>">
+    <meta property="og:description" content="<?= e($metaDescription !== '' ? $metaDescription : 'Noticias, eventos e fofocas de Capela e regiao no BabadoVip.') ?>">
+    <?php if ($canonicalUrl !== ''): ?><meta property="og:url" content="<?= e($canonicalUrl) ?>"><?php endif; ?>
+    <?php if ($metaImage !== ''): ?>
+        <meta property="og:image" content="<?= e($metaImage) ?>">
+        <meta property="og:image:secure_url" content="<?= e($metaImage) ?>">
+        <?php if ($metaImageMime !== ''): ?><meta property="og:image:type" content="<?= e($metaImageMime) ?>"><?php endif; ?>
+        <?php if ($metaImageWidth > 0): ?><meta property="og:image:width" content="<?= $metaImageWidth ?>"><?php endif; ?>
+        <?php if ($metaImageHeight > 0): ?><meta property="og:image:height" content="<?= $metaImageHeight ?>"><?php endif; ?>
+    <?php endif; ?>
+    <meta name="twitter:card" content="<?= $metaImage !== '' ? 'summary_large_image' : 'summary' ?>">
+    <meta name="twitter:title" content="<?= e($metaTitle !== '' ? $metaTitle : 'BabadoVip') ?>">
+    <meta name="twitter:description" content="<?= e($metaDescription !== '' ? $metaDescription : 'Noticias, eventos e fofocas de Capela e regiao no BabadoVip.') ?>">
+    <?php if ($metaImage !== ''): ?><meta name="twitter:image" content="<?= e($metaImage) ?>"><?php endif; ?>
     <?php $ga4MeasurementId = trim((string) config('analytics.ga4_measurement_id', '')); ?>
     <?php $cssVer = @filemtime(PUBLIC_PATH . '/assets/css/app.css') ?: time(); ?>
     <?php $jsVer = @filemtime(PUBLIC_PATH . '/assets/js/app.js') ?: time(); ?>
@@ -27,7 +86,7 @@
             <span class="brand-main">
                 <span class="brand-babado">Babado</span><span class="brand-vip">Vip</span>
             </span>
-            <span class="brand-tagline">Seu point &eacute; aqui!</span>
+            <span class="brand-tagline">Onde os vips aparecem!</span>
         </a>
         <button type="button" class="menu-toggle" aria-label="Abrir menu" aria-controls="siteMenu" aria-expanded="false">☰</button>
         <?php

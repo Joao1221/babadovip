@@ -97,5 +97,7 @@ Acesse: `http://localhost:8000`
 - Em produção, defina:
   - `APP_ENV=prod`
   - `APP_DEBUG=false`
+  - `APP_URL=https://www.babadovip.com.br`
   - `APP_KEY` forte e único
 - Idealmente mover uploads para storage externo (S3/objeto) no próximo passo.
+

@@ -2,8 +2,10 @@
     <div class="home-content">
         <?php foreach ($sections as $sectionData): $sec = $sectionData['meta']; $posts = $sectionData['posts']; ?>
         <section class="home-section">
-            <div class="section-head">
-                <h2><?= e($sec['titulo']) ?></h2>
+            <div class="section-head <?= $sec['slug'] === 'sociedade-festas' ? 'section-head-sociedade' : '' ?>">
+                <?php if ($sec['slug'] !== 'sociedade-festas'): ?>
+                    <h2><?= e($sec['titulo']) ?></h2>
+                <?php endif; ?>
                 <?php if ($sec['slug'] === 'sociedade-festas' && !empty($posts[0])): ?>
                     <span class="section-head-meta">
                         <?= e($sec['titulo']) ?>

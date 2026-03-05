@@ -203,6 +203,8 @@ final class PostController extends BaseController
             $source = PUBLIC_PATH . '/' . $coverPath;
             $final = $finalDir . '/' . basename($source);
             @rename($source, $final);
+            $social = dirname($final) . '/social-' . pathinfo($final, PATHINFO_FILENAME) . '.jpg';
+            $uploadService->createThumbnail($final, $social, 1200);
             $postModel->update($postId, array_merge($data, [
                 'imagem_capa' => str_replace('\\', '/', str_replace(PUBLIC_PATH . '/', '', $final)),
             ]));
