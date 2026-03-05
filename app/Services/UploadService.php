@@ -89,6 +89,68 @@ final class UploadService
         imagedestroy($thumb);
     }
 
+    public function createSocialCard(string $sourcePath, string $targetPath, int $targetWidth = 1200, int $targetHeight = 630): void
+    {
+        $info = @getimagesize($sourcePath);
+        if ($info === false) {
+            return;
+        }
+
+        $srcImg = match ($info['mime']) {
+            'image/jpeg' => @imagecreatefromjpeg($sourcePath),
+            'image/png' => @imagecreatefrompng($sourcePath),
+            'image/webp' => @imagecreatefromwebp($sourcePath),
+            default => null,
+        };
+        if (!$srcImg) {
+            return;
+        }
+
+        $srcWidth = (int) ($info[0] ?? 0);
+        $srcHeight = (int) ($info[1] ?? 0);
+        if ($srcWidth <= 0 || $srcHeight <= 0) {
+            imagedestroy($srcImg);
+            return;
+        }
+
+        $target = imagecreatetruecolor($targetWidth, $targetHeight);
+        $white = imagecolorallocate($target, 255, 255, 255);
+        imagefill($target, 0, 0, $white);
+
+        $srcRatio = $srcWidth / $srcHeight;
+        $targetRatio = $targetWidth / $targetHeight;
+
+        if ($srcRatio > $targetRatio) {
+            $cropHeight = $srcHeight;
+            $cropWidth = (int) round($srcHeight * $targetRatio);
+            $srcX = (int) round(($srcWidth - $cropWidth) / 2);
+            $srcY = 0;
+        } else {
+            $cropWidth = $srcWidth;
+            $cropHeight = (int) round($srcWidth / $targetRatio);
+            $srcX = 0;
+            $srcY = (int) round(($srcHeight - $cropHeight) / 2);
+        }
+
+        imagecopyresampled(
+            $target,
+            $srcImg,
+            0,
+            0,
+            $srcX,
+            $srcY,
+            $targetWidth,
+            $targetHeight,
+            $cropWidth,
+            $cropHeight
+        );
+
+        imagejpeg($target, $targetPath, 85);
+
+        imagedestroy($srcImg);
+        imagedestroy($target);
+    }
+
     public function deleteDirectory(string $path): void
     {
         if (!is_dir($path)) {

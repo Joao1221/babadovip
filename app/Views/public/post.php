@@ -1,34 +1,25 @@
 <?php use App\Core\Csrf; ?>
 <?php
-$shareUrl = url('/materia/' . (string) ($post['slug'] ?? ''));
-$appendUtm = static function (string $baseUrl, array $utm): string {
-    $separator = str_contains($baseUrl, '?') ? '&' : '?';
-    return $baseUrl . $separator . http_build_query($utm);
-};
+$shareUrl = (string) ($canonicalUrl ?? url('/materia/' . (string) ($post['slug'] ?? '')));
 $shareTitleRaw = str_ireplace(['<br />', '<br/>', '<br>'], ' ', (string) ($post['titulo'] ?? ''));
 $shareTitle = trim((string) preg_replace('/\s+/u', ' ', strip_tags($shareTitleRaw)));
 if ($shareTitle === '') {
     $shareTitle = 'Confira esta materia';
 }
-$shareVersion = (string) strtotime((string) ($post['atualizado_em'] ?? $post['publicado_em'] ?? $post['criado_em'] ?? now()));
-if ($shareVersion === '' || $shareVersion === '0') {
-    $shareVersion = (string) ($post['id'] ?? '1');
+$shareSummaryRaw = str_ireplace(['<br />', '<br/>', '<br>'], ' ', (string) ($post['subtitulo'] ?? ''));
+$shareSummary = trim((string) preg_replace('/\s+/u', ' ', strip_tags($shareSummaryRaw)));
+if ($shareSummary === '') {
+    $shareSummary = trim((string) preg_replace('/\s+/u', ' ', strip_tags((string) ($post['conteudo_html'] ?? ''))));
 }
-$shareContentToken = 'p' . (string) ($post['id'] ?? '0') . '-v' . $shareVersion;
-$whatsAppTrackedUrl = $appendUtm($shareUrl, [
-    'utm_source' => 'whatsapp',
-    'utm_medium' => 'share-bar',
-    'utm_campaign' => 'materias',
-    'utm_content' => $shareContentToken,
-]);
-$linkTrackedUrl = $appendUtm($shareUrl, [
-    'utm_source' => 'link',
-    'utm_medium' => 'copy-link',
-    'utm_campaign' => 'materias',
-    'utm_content' => $shareContentToken,
-]);
+if (mb_strlen($shareSummary) > 200) {
+    $shareSummary = rtrim(mb_substr($shareSummary, 0, 197)) . '...';
+}
+$whatsAppText = $shareTitle . "\n" . $shareUrl;
+if ($shareSummary !== '') {
+    $whatsAppText = $shareTitle . ' - ' . $shareSummary . "\n" . $shareUrl;
+}
 $facebookShareUrl = 'https://www.facebook.com/sharer/sharer.php?u=' . rawurlencode($shareUrl);
-$whatsAppShareUrl = 'https://api.whatsapp.com/send/?text=' . rawurlencode($whatsAppTrackedUrl);
+$whatsAppShareUrl = 'https://wa.me/?text=' . rawurlencode($whatsAppText);
 ?>
 <article class="post-page">
     <header>
@@ -50,7 +41,7 @@ $whatsAppShareUrl = 'https://api.whatsapp.com/send/?text=' . rawurlencode($whats
                 <button
                     type="button"
                     class="share-icon-btn share-link"
-                    data-share-url="<?= e($linkTrackedUrl) ?>"
+                    data-share-url="<?= e($shareUrl) ?>"
                     data-share-title="<?= e($shareTitle) ?>"
                     aria-label="Compartilhar link da materia"
                     title="Compartilhar link"

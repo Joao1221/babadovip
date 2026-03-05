@@ -271,7 +271,7 @@
 
         try {
           await copyText(shareUrl);
-          setFeedback("Link copiado.");
+          setFeedback("Link copiado!");
         } catch (error) {
           setFeedback("Nao foi possivel copiar o link.", true);
         }

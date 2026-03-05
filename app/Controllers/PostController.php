@@ -13,6 +13,8 @@ use App\Services\UploadService;
 final class PostController extends BaseController
 {
     private const COMMENTABLE_CATEGORY_SLUGS = ['fofocas-rapidas', 'eventos-agenda'];
+    private const SITE_URL = 'https://www.babadovip.com.br';
+    private const DEFAULT_SOCIAL_IMAGE = 'https://www.babadovip.com.br/public/img/babado-vip.png';
 
     public function show(string $slug): void
     {
@@ -33,7 +35,9 @@ final class PostController extends BaseController
         $comments = $allowComments ? $commentModel->listApprovedByPost((int) $post['id']) : [];
         $metaDescription = $this->buildMetaDescription($post);
         $metaImage = $this->buildMetaImage($post, $photos);
-        $canonicalUrl = url('/materia/' . (string) $post['slug']);
+        $canonicalUrl = $this->siteUrl('/materia/' . (string) $post['slug']);
+
+        $metaTitle = $this->buildMetaTitle($post);
 
         $this->render('public/post', [
             'title' => $post['titulo'] . ' - BabadoVip',
@@ -42,7 +46,7 @@ final class PostController extends BaseController
             'allowComments' => $allowComments,
             'comments' => $comments,
             'canonicalUrl' => $canonicalUrl,
-            'metaTitle' => trim((string) preg_replace('/\s+/u', ' ', strip_tags(str_ireplace(['<br />', '<br/>', '<br>'], ' ', (string) ($post['titulo'] ?? ''))))),
+            'metaTitle' => $metaTitle,
             'metaDescription' => $metaDescription,
             'metaImage' => $metaImage,
             'metaType' => 'article',
@@ -94,21 +98,32 @@ final class PostController extends BaseController
         return in_array($slug, self::COMMENTABLE_CATEGORY_SLUGS, true);
     }
 
-    private function buildMetaDescription(array $post): string
+    private function buildMetaTitle(array $post): string
     {
-        $subtitle = trim((string) ($post['subtitulo'] ?? ''));
-        if ($subtitle !== '') {
-            return mb_substr($subtitle, 0, 200);
+        $title = $this->cleanText((string) ($post['titulo'] ?? ''));
+        if ($title === '') {
+            return 'BabadoVip';
         }
 
-        $plainContent = trim((string) preg_replace('/\s+/u', ' ', strip_tags((string) ($post['conteudo_html'] ?? ''))));
+        return $this->truncateText($title, 90);
+    }
+
+    private function buildMetaDescription(array $post): string
+    {
+        $subtitle = $this->cleanText((string) ($post['subtitulo'] ?? ''));
+        if ($subtitle !== '') {
+            return $this->truncateText($subtitle, 200);
+        }
+
+        $plainContent = $this->cleanText((string) ($post['conteudo_html'] ?? ''));
         if ($plainContent === '') {
             return 'Leia a materia completa no BabadoVip.';
         }
-        return mb_substr($plainContent, 0, 200);
+
+        return $this->truncateText($plainContent, 200);
     }
 
-    private function buildMetaImage(array $post, array $photos): ?string
+    private function buildMetaImage(array $post, array $photos): string
     {
         $imagePath = trim((string) ($post['imagem_capa'] ?? ''));
         if ($imagePath === '' && !empty($photos[0]['arquivo'])) {
@@ -126,7 +141,7 @@ final class PostController extends BaseController
         }
 
         if ($imagePath === '') {
-            $imagePath = 'img/babado-vip.png';
+            return self::DEFAULT_SOCIAL_IMAGE;
         }
 
         $socialPath = $this->resolveSocialMetaImage($imagePath);
@@ -134,7 +149,7 @@ final class PostController extends BaseController
             $imagePath = $socialPath;
         }
 
-        return url($imagePath);
+        return $this->siteUrl($imagePath);
     }
 
     private function resolveSocialMetaImage(string $imagePath): ?string
@@ -151,9 +166,17 @@ final class PostController extends BaseController
 
         $socialFileName = 'social-' . pathinfo($sourceFullPath, PATHINFO_FILENAME) . '.jpg';
         $socialFullPath = dirname($sourceFullPath) . '/' . $socialFileName;
-        if (!is_file($socialFullPath)) {
+        $mustRegenerateSocial = true;
+        if (is_file($socialFullPath)) {
+            $socialImageInfo = @getimagesize($socialFullPath);
+            $socialWidth = (int) ($socialImageInfo[0] ?? 0);
+            $socialHeight = (int) ($socialImageInfo[1] ?? 0);
+            $mustRegenerateSocial = $socialWidth !== 1200 || $socialHeight !== 630;
+        }
+
+        if ($mustRegenerateSocial) {
             try {
-                (new UploadService())->createThumbnail($sourceFullPath, $socialFullPath, 1200);
+                (new UploadService())->createSocialCard($sourceFullPath, $socialFullPath, 1200, 630);
             } catch (\Throwable) {
                 return null;
             }
@@ -165,5 +188,25 @@ final class PostController extends BaseController
 
         $socialRelativePath = str_replace('\\', '/', str_replace(PUBLIC_PATH . '/', '', $socialFullPath));
         return $socialRelativePath !== '' ? $socialRelativePath : null;
+    }
+
+    private function cleanText(string $value): string
+    {
+        $value = str_ireplace(['<br />', '<br/>', '<br>'], ' ', $value);
+        return trim((string) preg_replace('/\s+/u', ' ', strip_tags($value)));
+    }
+
+    private function truncateText(string $value, int $maxChars): string
+    {
+        if (mb_strlen($value) <= $maxChars) {
+            return $value;
+        }
+
+        return rtrim(mb_substr($value, 0, $maxChars - 3)) . '...';
+    }
+
+    private function siteUrl(string $path = ''): string
+    {
+        return rtrim(self::SITE_URL, '/') . '/' . ltrim($path, '/');
     }
 }
