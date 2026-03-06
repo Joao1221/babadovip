@@ -73,11 +73,12 @@
                         <p><strong><?= e($card['titulo']) ?></strong></p>
                         <p class="muted">ID <?= (int) $card['post_id'] ?> | <?= e((string) $card['categoria_nome']) ?> | <?= e($statusLabels[$card['status']] ?? $card['status']) ?></p>
                         <p class="muted"><?= e($card['slug']) ?></p>
-                        <a class="btn-small" href="<?= e(url('/admin/posts/' . $card['post_id'] . '/editar')) ?>">Editar materia</a>
                     <?php else: ?>
                         <p class="muted">Sem materia vinculada.</p>
                     <?php endif; ?>
-                    <form method="post" action="<?= e(url('/admin/home-builder/secao/' . $sec['id'] . '/card/' . $pos)) ?>">
+                    <?php $saveFormId = 'hb-save-' . (int) $sec['id'] . '-' . $pos; ?>
+                    <?php $removeFormId = 'hb-remove-' . (int) $sec['id'] . '-' . $pos; ?>
+                    <form id="<?= e($saveFormId) ?>" class="home-builder-card-form" method="post" action="<?= e(url('/admin/home-builder/secao/' . $sec['id'] . '/card/' . $pos)) ?>">
                         <?= Csrf::field() ?>
                         <label>Trocar materia do card</label>
                         <select name="post_id" required>
@@ -86,12 +87,19 @@
                                 <option value="<?= (int) $rp['id'] ?>"><?= e('#' . $rp['id'] . ' - ' . $rp['titulo']) ?></option>
                             <?php endforeach; ?>
                         </select>
-                        <button class="btn-small">Salvar card</button>
                     </form>
-                    <form method="post" action="<?= e(url('/admin/home-builder/secao/' . $sec['id'] . '/card/' . $pos . '/remover')) ?>" onsubmit="return confirm('Remover materia deste card?')">
+                    <form id="<?= e($removeFormId) ?>" class="home-builder-card-remove-form" method="post" action="<?= e(url('/admin/home-builder/secao/' . $sec['id'] . '/card/' . $pos . '/remover')) ?>" onsubmit="return confirm('Remover materia deste card?')">
                         <?= Csrf::field() ?>
-                        <button class="btn-danger">Remover do card</button>
                     </form>
+                    <div class="home-builder-actions">
+                        <?php if ($card): ?>
+                            <a class="btn-small" href="<?= e(url('/admin/posts/' . $card['post_id'] . '/editar')) ?>">Editar</a>
+                        <?php else: ?>
+                            <button type="button" class="btn-small" disabled>Editar</button>
+                        <?php endif; ?>
+                        <button type="submit" class="btn-small" form="<?= e($saveFormId) ?>">Salvar</button>
+                        <button type="submit" class="btn-danger" form="<?= e($removeFormId) ?>">Remover</button>
+                    </div>
                 </div>
             </article>
         <?php endfor; ?>

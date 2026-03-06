@@ -95,7 +95,13 @@ final class SubmissionController extends BaseController
         if ($photosCount > 0) {
             $dir = PUBLIC_PATH . '/uploads/submissions/' . date('Y/m') . '/sub-' . $submissionId . '/';
             $uploadService = new UploadService();
-            $saved = $uploadService->processMultiple($_FILES['fotos'], $dir, 20);
+            try {
+                $saved = $uploadService->processMultiple($_FILES['fotos'], $dir, 20);
+            } catch (\RuntimeException $exception) {
+                $submissionModel->delete($submissionId);
+                Flash::set('danger', $this->friendlyUploadMessage($exception->getMessage()));
+                redirect('/enviar');
+            }
             foreach ($saved as $i => $item) {
                 $relative = str_replace('\\', '/', str_replace(PUBLIC_PATH . '/', '', $item['full_path']));
                 $thumbPath = dirname($item['full_path']) . '/thumb-' . basename($item['full_path']);
@@ -113,5 +119,16 @@ final class SubmissionController extends BaseController
         clear_old();
         Flash::set('success', 'Recebemos! Está em moderação. Protocolo: ' . $protocol);
         redirect('/enviar');
+    }
+
+    private function friendlyUploadMessage(string $rawMessage): string
+    {
+        if (str_contains($rawMessage, 'Arquivo excede o limite permitido')) {
+            return 'Cada foto pode ter no maximo 5 MB.';
+        }
+        if (str_contains($rawMessage, 'Tipo de arquivo')) {
+            return 'Tipo de arquivo nao permitido. Use JPG, PNG, WEBP ou AVIF.';
+        }
+        return 'Nao foi possivel processar as fotos. Verifique os arquivos e tente novamente.';
     }
 }

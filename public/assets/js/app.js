@@ -8,6 +8,89 @@
     });
   }
 
+  const welcomePopup = document.getElementById("welcomePopup");
+  const welcomePopupDismiss = document.getElementById("welcomePopupDismiss");
+  const welcomePopupSend = document.getElementById("welcomePopupSend");
+  const welcomeStorageKey = "babadovip_welcome_popup_v1";
+  const hasDismissedWelcome = () => {
+    try {
+      return window.localStorage.getItem(welcomeStorageKey) === "1";
+    } catch (error) {
+      return false;
+    }
+  };
+  const markWelcomeDismissed = () => {
+    try {
+      window.localStorage.setItem(welcomeStorageKey, "1");
+    } catch (error) {
+      // no-op: storage can be blocked by browser privacy settings
+    }
+  };
+  const closeWelcomePopup = () => {
+    if (!welcomePopup) return;
+    markWelcomeDismissed();
+    welcomePopup.classList.remove("show");
+    welcomePopup.hidden = true;
+  };
+  const openWelcomePopup = () => {
+    if (!welcomePopup || !welcomePopupDismiss || !welcomePopupSend) return;
+    if (hasDismissedWelcome()) return;
+    welcomePopup.hidden = false;
+    welcomePopup.classList.add("show");
+  };
+  if (welcomePopupDismiss) {
+    welcomePopupDismiss.addEventListener("click", closeWelcomePopup);
+  }
+  if (welcomePopupSend) {
+    welcomePopupSend.addEventListener("click", () => {
+      markWelcomeDismissed();
+    });
+  }
+
+  const lgpdPopup = document.getElementById("lgpdPopup");
+  const lgpdPopupAccept = document.getElementById("lgpdPopupAccept");
+  if (lgpdPopup && lgpdPopupAccept) {
+    const lgpdStorageKey = "babadovip_lgpd_notice_v1";
+    const hasAcceptedLgpd = () => {
+      try {
+        return window.localStorage.getItem(lgpdStorageKey) === "1";
+      } catch (error) {
+        return false;
+      }
+    };
+    const markLgpdAccepted = () => {
+      try {
+        window.localStorage.setItem(lgpdStorageKey, "1");
+      } catch (error) {
+        // no-op: storage can be blocked by browser privacy settings
+      }
+    };
+    const closeLgpdPopup = () => {
+      markLgpdAccepted();
+      lgpdPopup.classList.remove("show");
+      lgpdPopup.hidden = true;
+      openWelcomePopup();
+    };
+
+    if (!hasAcceptedLgpd()) {
+      lgpdPopup.hidden = false;
+      lgpdPopup.classList.add("show");
+    } else {
+      openWelcomePopup();
+    }
+
+    lgpdPopupAccept.addEventListener("click", closeLgpdPopup);
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !lgpdPopup.hidden) {
+        closeLgpdPopup();
+      } else if (event.key === "Escape" && welcomePopup && !welcomePopup.hidden) {
+        closeWelcomePopup();
+      }
+    });
+  } else {
+    openWelcomePopup();
+  }
+
   const lightbox = document.getElementById("lightbox");
   const galleryData = window.BABADOVIP_GALLERY || [];
   if (lightbox && galleryData.length) {
@@ -36,12 +119,132 @@
 
   document.querySelectorAll("input[type=file][data-max-files]").forEach((input) => {
     if (input.getAttribute("data-gallery-managed") === "1") return;
+    const previewTargetId = input.getAttribute("data-preview-target") || "";
+    const previewTarget = previewTargetId ? document.getElementById(previewTargetId) : null;
+    let previewUrls = [];
+    let selectedFiles = [];
+
+    const clearPreviewUrls = () => {
+      previewUrls.forEach((url) => URL.revokeObjectURL(url));
+      previewUrls = [];
+    };
+
+    const syncSelectedFiles = () => {
+      const dt = new DataTransfer();
+      selectedFiles.forEach((file) => dt.items.add(file));
+      input.files = dt.files;
+    };
+
+    const renderSimplePreview = () => {
+      if (!previewTarget) return;
+      clearPreviewUrls();
+      previewTarget.innerHTML = "";
+
+      if (!selectedFiles.length) {
+        return;
+      }
+
+      selectedFiles.forEach((file, idx) => {
+        const item = document.createElement("article");
+        item.className = "upload-preview-item";
+
+        if ((file.type || "").startsWith("image/")) {
+          const thumb = document.createElement("img");
+          const url = URL.createObjectURL(file);
+          previewUrls.push(url);
+          thumb.src = url;
+          thumb.alt = `Foto ${idx + 1}`;
+          item.appendChild(thumb);
+        } else {
+          const placeholder = document.createElement("div");
+          placeholder.className = "upload-preview-placeholder";
+          placeholder.textContent = "Arquivo";
+          item.appendChild(placeholder);
+        }
+
+        const info = document.createElement("div");
+        info.className = "upload-preview-info";
+        const name = document.createElement("strong");
+        name.textContent = `${idx + 1}. ${file.name}`;
+        const size = document.createElement("small");
+        size.textContent = `${Math.max(1, Math.round(file.size / 1024))} KB`;
+        info.appendChild(name);
+        info.appendChild(size);
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.className = "btn-danger upload-preview-remove";
+        removeBtn.dataset.removeIndex = String(idx);
+        removeBtn.textContent = "Remover";
+        info.appendChild(removeBtn);
+        item.appendChild(info);
+        previewTarget.appendChild(item);
+      });
+    };
+
+    if (previewTarget) {
+      previewTarget.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        const removeBtn = target.closest("button[data-remove-index]");
+        if (!(removeBtn instanceof HTMLButtonElement)) return;
+        const removeIndex = parseInt(removeBtn.dataset.removeIndex || "", 10);
+        if (Number.isNaN(removeIndex) || !selectedFiles[removeIndex]) return;
+        selectedFiles.splice(removeIndex, 1);
+        syncSelectedFiles();
+        renderSimplePreview();
+      });
+    }
+
     input.addEventListener("change", () => {
       const max = parseInt(input.getAttribute("data-max-files") || "20", 10);
-      if ((input.files || []).length > max) {
-        alert(`Limite de ${max} arquivos.`);
-        input.value = "";
+      const maxFileSizeBytes = parseInt(input.getAttribute("data-max-size-bytes") || String(5 * 1024 * 1024), 10);
+      const pickedFiles = Array.from(input.files || []);
+      if (!pickedFiles.length) {
+        return;
       }
+
+      const allowedBySize = [];
+      let oversizedCount = 0;
+      pickedFiles.forEach((file) => {
+        if (Number.isFinite(maxFileSizeBytes) && maxFileSizeBytes > 0 && file.size > maxFileSizeBytes) {
+          oversizedCount += 1;
+          return;
+        }
+        allowedBySize.push(file);
+      });
+      if (oversizedCount > 0) {
+        const sizeMb = (maxFileSizeBytes / (1024 * 1024)).toFixed(0);
+        alert(`${oversizedCount} arquivo(s) acima de ${sizeMb} MB não foram adicionados.`);
+      }
+
+      const existingKeys = new Set(
+        selectedFiles.map((file) => `${file.name}|${file.size}|${file.lastModified}|${file.type || ""}`)
+      );
+      const uniquePicked = allowedBySize.filter((file) => {
+        const key = `${file.name}|${file.size}|${file.lastModified}|${file.type || ""}`;
+        if (existingKeys.has(key)) {
+          return false;
+        }
+        existingKeys.add(key);
+        return true;
+      });
+
+      const availableSlots = Math.max(0, max - selectedFiles.length);
+      if (availableSlots <= 0) {
+        alert(`Limite de ${max} arquivos.`);
+        syncSelectedFiles();
+        renderSimplePreview();
+        return;
+      }
+
+      const filesToAdd = uniquePicked.slice(0, availableSlots);
+      if (filesToAdd.length < uniquePicked.length) {
+        alert(`Limite de ${max} arquivos. Apenas ${filesToAdd.length} arquivo(s) adicionado(s).`);
+      }
+
+      selectedFiles = selectedFiles.concat(filesToAdd);
+      syncSelectedFiles();
+      renderSimplePreview();
     });
   });
 

@@ -28,6 +28,26 @@ function e_with_br(?string $value): string
     return implode('<br>', $escaped);
 }
 
+function normalize_hex_color(?string $value, string $fallback = '#FFFFFF'): string
+{
+    $safeFallback = strtoupper(trim($fallback));
+    if (!preg_match('/^#[0-9A-F]{6}$/', $safeFallback)) {
+        $safeFallback = '#FFFFFF';
+    }
+
+    $normalized = strtoupper(trim((string) $value));
+    if (preg_match('/^#[0-9A-F]{6}$/', $normalized)) {
+        return $normalized;
+    }
+
+    return $safeFallback;
+}
+
+function post_title_color(array $post, string $fallback = '#FFFFFF'): string
+{
+    return normalize_hex_color(isset($post['overlay_titulo_cor']) ? (string) $post['overlay_titulo_cor'] : null, $fallback);
+}
+
 function url(string $path = ''): string
 {
     return rtrim((string) config('app.url'), '/') . '/' . ltrim($path, '/');

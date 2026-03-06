@@ -135,11 +135,38 @@
             <span>Capela - Sergipe</span>
         </div>
         <div class="footer-actions">
-            <a class="btn-small cta-contact" href="<?= e(url('/contato')) ?>">Contato</a>
+            <a class="btn-small cta-contact" href="<?= e(url('/contato')) ?>">Fale conosco</a>
             <a class="btn-small vip" href="<?= e(url('/admin/login')) ?>">Admin</a>
         </div>
     </div>
 </footer>
+<div class="lgpd-popup" id="lgpdPopup" hidden>
+    <div class="lgpd-popup-card" role="dialog" aria-modal="true" aria-labelledby="lgpdPopupTitle">
+        <h3 id="lgpdPopupTitle">Aviso de Privacidade (LGPD)</h3>
+        <p>
+            Coletamos dados de acesso como IP, navegador, data/hora e pagina de origem para seguranca,
+            prevencao de fraude e cumprimento legal.
+        </p>
+        <p>
+            <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" target="_blank" rel="noopener noreferrer">
+                Leia a Lei Geral de Protecao de Dados (Lei n 13.709/2018)
+            </a>
+        </p>
+        <button type="button" class="btn-primary" id="lgpdPopupAccept">Entendi</button>
+    </div>
+</div>
+<div class="welcome-popup" id="welcomePopup" hidden>
+    <div class="welcome-popup-card" role="dialog" aria-modal="true" aria-labelledby="welcomePopupTitle">
+        <h3 style="color: red;" id="welcomePopupTitle">Bem vindo. Aqui você é notícia!</h3>
+        <p>
+            Envie sua notícia/matéria sobre seu evento, algo que aconteceu na cidade. Será publicada aqui no <strong>BabadoVip</strong> para toda a região ler e compartilhar! Fique à vontade para enviar suas notícias, eventos, fotos e vídeos. Estamos ansiosos para compartilhar as novidades da nossa cidade e região!
+        </p>
+        <div class="welcome-popup-actions">
+            <a class="btn-primary" id="welcomePopupSend" href="https://www.babadovip.com.br/enviar">Enviar noticia</a>
+            <button type="button" class="btn-small" id="welcomePopupDismiss">Agora nao</button>
+        </div>
+    </div>
+</div>
 <script src="<?= e(url('assets/js/app.js?v=' . $jsVer)) ?>" defer></script>
 </body>
 </html>

@@ -22,7 +22,7 @@
                             <?php if (!empty($post['categoria_nome'])): ?><span><?= e((string) $post['categoria_nome']) ?></span><?php endif; ?>
                             <time><?= e(date('d/m H:i', strtotime((string) ($post['publicado_em'] ?? $post['criado_em'])))) ?></time>
                         </div>
-                        <h3><a href="<?= e(url('/materia/' . $post['slug'])) ?>"><?= e($post['titulo']) ?></a></h3>
+                        <h3><a href="<?= e(url('/materia/' . $post['slug'])) ?>" style="color: <?= e(post_title_color($post)) ?>;"><?= e($post['titulo']) ?></a></h3>
                         <?php if (!empty($post['subtitulo'])): ?><p><?= e((string) $post['subtitulo']) ?></p><?php endif; ?>
                     </div>
                 </article>
@@ -45,7 +45,7 @@
                             <?php if (!empty($lead['categoria_nome'])): ?><span><?= e((string) $lead['categoria_nome']) ?></span><?php endif; ?>
                             <time><?= e(date('d/m H:i', strtotime((string) ($lead['publicado_em'] ?? $lead['criado_em'])))) ?></time>
                         </div>
-                        <h2><a href="<?= e(url('/materia/' . $lead['slug'])) ?>"><?= e($lead['titulo']) ?></a></h2>
+                        <h2><a href="<?= e(url('/materia/' . $lead['slug'])) ?>" style="color: <?= e(post_title_color($lead)) ?>;"><?= e($lead['titulo']) ?></a></h2>
                         <?php if (!empty($lead['subtitulo'])): ?><p><?= e((string) $lead['subtitulo']) ?></p><?php endif; ?>
                     </div>
                 </article>
@@ -62,7 +62,7 @@
                             <?php if (!empty($side['categoria_nome'])): ?><span><?= e((string) $side['categoria_nome']) ?></span><?php endif; ?>
                             <time><?= e(date('d/m H:i', strtotime((string) ($side['publicado_em'] ?? $side['criado_em'])))) ?></time>
                         </div>
-                        <h3><a href="<?= e(url('/materia/' . $side['slug'])) ?>"><?= e($side['titulo']) ?></a></h3>
+                        <h3><a href="<?= e(url('/materia/' . $side['slug'])) ?>" style="color: <?= e(post_title_color($side)) ?>;"><?= e($side['titulo']) ?></a></h3>
                         <?php if (!empty($side['subtitulo'])): ?><p><?= e((string) $side['subtitulo']) ?></p><?php endif; ?>
                     </div>
                 </article>
@@ -81,7 +81,7 @@
                                     <?php if (!empty($post['categoria_nome'])): ?><span><?= e((string) $post['categoria_nome']) ?></span><?php endif; ?>
                                     <time><?= e(date('d/m H:i', strtotime((string) ($post['publicado_em'] ?? $post['criado_em'])))) ?></time>
                                 </div>
-                                <h3><a href="<?= e(url('/materia/' . $post['slug'])) ?>"><?= e($post['titulo']) ?></a></h3>
+                                <h3><a href="<?= e(url('/materia/' . $post['slug'])) ?>" style="color: <?= e(post_title_color($post)) ?>;"><?= e($post['titulo']) ?></a></h3>
                                 <?php if (!empty($post['subtitulo'])): ?><p><?= e((string) $post['subtitulo']) ?></p><?php endif; ?>
                             </div>
                         </article>
@@ -103,7 +103,7 @@
                             <?php if (!empty($post['categoria_nome'])): ?><span><?= e((string) $post['categoria_nome']) ?></span><?php endif; ?>
                             <time><?= e(date('d/m H:i', strtotime((string) ($post['publicado_em'] ?? $post['criado_em'])))) ?></time>
                         </div>
-                        <h3><a href="<?= e(url('/materia/' . $post['slug'])) ?>"><?= e($post['titulo']) ?></a></h3>
+                        <h3><a href="<?= e(url('/materia/' . $post['slug'])) ?>" style="color: <?= e(post_title_color($post)) ?>;"><?= e($post['titulo']) ?></a></h3>
                         <?php if (!empty($post['subtitulo'])): ?><p><?= e((string) $post['subtitulo']) ?></p><?php endif; ?>
                     </div>
                 </article>

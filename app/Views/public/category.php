@@ -17,7 +17,7 @@
                 </a>
             <?php endif; ?>
             <div class="card-body">
-                <h3><a href="<?= e(url('/materia/' . $post['slug'])) ?>"><?= e($post['titulo']) ?></a></h3>
+                <h3><a href="<?= e(url('/materia/' . $post['slug'])) ?>" style="color: <?= e(post_title_color($post)) ?>;"><?= e($post['titulo']) ?></a></h3>
                 <p><?= e((string) $post['subtitulo']) ?></p>
             </div>
         </article>

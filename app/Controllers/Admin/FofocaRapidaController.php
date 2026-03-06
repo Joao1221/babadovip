@@ -187,13 +187,13 @@ final class FofocaRapidaController extends BaseController
 
     private function buildFofocaContent(string $title, string $subtitle): string
     {
-        $safeTitle = htmlspecialchars($title, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
         $safeSubtitle = htmlspecialchars($subtitle, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 
         if ($safeSubtitle === '') {
+            $safeTitle = htmlspecialchars($title, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
             return '<p>' . $safeTitle . '</p>';
         }
 
-        return '<p>' . $safeTitle . '</p><p>' . nl2br($safeSubtitle) . '</p>';
+        return '<p>' . nl2br($safeSubtitle) . '</p>';
     }
 }

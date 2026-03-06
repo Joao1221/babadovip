@@ -104,7 +104,7 @@
     </label>
 
     <label class="full">Imagem de capa
-        <input type="file" name="imagem_capa" accept=".jpg,.jpeg,.png,.webp">
+        <input type="file" name="imagem_capa" accept=".jpg,.jpeg,.png,.webp,.avif">
     </label>
     <?php if ($coverImagePath !== ''): ?>
     <label class="full check">
@@ -142,7 +142,7 @@
                 </div>
             <?php endforeach; ?>
         </div>
-        <input type="file" id="galleryFiles" name="fotos[]" accept=".jpg,.jpeg,.png,.webp" multiple data-max-files="20" data-gallery-managed="1">
+        <input type="file" id="galleryFiles" name="fotos[]" accept=".jpg,.jpeg,.png,.webp,.avif" multiple data-max-files="20" data-gallery-managed="1">
         <small class="muted">Ordene arrastando os cards.</small>
     </div>
     <button type="submit" class="btn-primary full">Salvar Matéria</button>

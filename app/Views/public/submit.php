@@ -1,4 +1,4 @@
-<?php use App\Core\Csrf; ?>
+﻿<?php use App\Core\Csrf; ?>
 <section class="form-wrap">
     <h1>Enviar Babado</h1>
     <p class="muted">Mande sua sugestão ou matéria. Nossa equipe vai moderar antes de publicar.</p>
@@ -35,8 +35,19 @@
             <textarea name="conteudo" rows="8" required><?= e((string) old('conteudo')) ?></textarea>
         </label>
         <label class="full">Fotos (até 20)
-            <input type="file" name="fotos[]" accept=".jpg,.jpeg,.png,.webp" multiple data-max-files="20">
+            <input
+                type="file"
+                id="submitPhotos"
+                name="fotos[]"
+                accept=".jpg,.jpeg,.png,.webp,.avif"
+                multiple
+                data-max-files="20"
+                data-max-size-bytes="5242880"
+                data-preview-target="submitPhotoPreview"
+            >
         </label>
+        <small class="muted full">Tamanho máximo: 5mb p/ foto</small>
+        <div class="full upload-preview-grid" id="submitPhotoPreview" aria-live="polite"></div>
         <label class="check full">
             <input type="checkbox" name="anonimo" value="1"> Manter anonimato
         </label>

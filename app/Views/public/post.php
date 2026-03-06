@@ -20,6 +20,16 @@ if ($shareSummary !== '') {
 }
 $facebookShareUrl = 'https://www.facebook.com/sharer/sharer.php?u=' . rawurlencode($shareUrl);
 $whatsAppShareUrl = 'https://wa.me/?text=' . rawurlencode($whatsAppText);
+$isQuickGossip = (string) ($post['categoria_slug'] ?? '') === 'fofocas-rapidas';
+$postContentHtml = (string) ($post['conteudo_html'] ?? '');
+if ($isQuickGossip && (string) ($post['subtitulo'] ?? '') !== '') {
+    $safeTitle = htmlspecialchars((string) ($post['titulo'] ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    $titlePattern = '/^\s*<p>\s*' . preg_quote($safeTitle, '/') . '\s*<\/p>\s*/iu';
+    $cleanedContent = preg_replace($titlePattern, '', $postContentHtml, 1);
+    if ($cleanedContent !== null && trim(strip_tags($cleanedContent)) !== '') {
+        $postContentHtml = $cleanedContent;
+    }
+}
 ?>
 <article class="post-page">
     <header>
@@ -50,11 +60,13 @@ $whatsAppShareUrl = 'https://wa.me/?text=' . rawurlencode($whatsAppText);
                 </button>
             </div>
         </div>
-        <h1><?= e_with_br($post['titulo']) ?></h1>
-        <?php if ($post['subtitulo']): ?><p class="lead"><?= e($post['subtitulo']) ?></p><?php endif; ?>
+        <h1 style="color: <?= e(post_title_color($post)) ?>;"><?= e_with_br($post['titulo']) ?></h1>
+        <?php if (!$isQuickGossip && $post['subtitulo']): ?><p class="lead"><?= e($post['subtitulo']) ?></p><?php endif; ?>
         <?php if ($post['imagem_capa']): ?><img class="cover" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>"><?php endif; ?>
     </header>
-    <section class="post-content"><?= $post['conteudo_html'] ?></section>
+    <?php if (trim(strip_tags($postContentHtml)) !== ''): ?>
+    <section class="post-content"><?= $postContentHtml ?></section>
+    <?php endif; ?>
 
     <?php if ($photos): ?>
     <section>

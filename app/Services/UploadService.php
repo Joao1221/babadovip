@@ -5,8 +5,14 @@ namespace App\Services;
 
 final class UploadService
 {
-    private const ALLOWED_EXT = ['jpg', 'jpeg', 'png', 'webp'];
-    private const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp'];
+    private const ALLOWED_EXT = ['jpg', 'jpeg', 'png', 'webp', 'avif'];
+    private const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
+    private const MIME_TO_EXT = [
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/webp' => 'webp',
+        'image/avif' => 'avif',
+    ];
 
     public function processMultiple(array $files, string $targetDir, int $maxFiles = 20): array
     {
@@ -33,7 +39,7 @@ final class UploadService
 
             $tmp = $item['tmp_name'];
             $mime = (string) mime_content_type($tmp);
-            $ext = strtolower((string) pathinfo((string) $item['name'], PATHINFO_EXTENSION));
+            $ext = self::MIME_TO_EXT[$mime] ?? '';
             if (!in_array($mime, self::ALLOWED_MIME, true) || !in_array($ext, self::ALLOWED_EXT, true)) {
                 throw new \RuntimeException('Tipo de arquivo não permitido.');
             }
@@ -69,19 +75,29 @@ final class UploadService
             'image/jpeg' => imagecreatefromjpeg($sourcePath),
             'image/png' => imagecreatefrompng($sourcePath),
             'image/webp' => imagecreatefromwebp($sourcePath),
+            'image/avif' => function_exists('imagecreatefromavif') ? @imagecreatefromavif($sourcePath) : null,
             default => null,
         };
         if (!$srcImg) {
+            @copy($sourcePath, $thumbPath);
             return;
         }
         $thumb = imagecreatetruecolor($newWidth, $newHeight);
         imagecopyresampled($thumb, $srcImg, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
 
         $ext = strtolower((string) pathinfo($thumbPath, PATHINFO_EXTENSION));
+        if ($ext === 'avif' && !function_exists('imageavif')) {
+            @copy($sourcePath, $thumbPath);
+            imagedestroy($srcImg);
+            imagedestroy($thumb);
+            return;
+        }
+
         match ($ext) {
             'jpg', 'jpeg' => imagejpeg($thumb, $thumbPath, 82),
             'png' => imagepng($thumb, $thumbPath, 7),
             'webp' => imagewebp($thumb, $thumbPath, 82),
+            'avif' => imageavif($thumb, $thumbPath, 70),
             default => imagejpeg($thumb, $thumbPath, 82),
         };
 
@@ -100,6 +116,7 @@ final class UploadService
             'image/jpeg' => @imagecreatefromjpeg($sourcePath),
             'image/png' => @imagecreatefrompng($sourcePath),
             'image/webp' => @imagecreatefromwebp($sourcePath),
+            'image/avif' => function_exists('imagecreatefromavif') ? @imagecreatefromavif($sourcePath) : null,
             default => null,
         };
         if (!$srcImg) {
