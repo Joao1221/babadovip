@@ -11,8 +11,8 @@
             <?php foreach ($posts as $post): ?>
                 <article class="ultimas-list-card">
                     <a class="ultimas-list-thumb" href="<?= e(url('/materia/' . $post['slug'])) ?>">
-                        <?php if (!empty($post['imagem_capa'])): ?>
-                            <img loading="lazy" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>">
+                        <?php if (post_cover_desktop_path($post) !== ''): ?>
+                            <?= render_post_cover_picture($post, (string) $post['titulo']) ?>
                         <?php else: ?>
                             <div class="ultimas-list-thumb-empty">Sem imagem</div>
                         <?php endif; ?>
@@ -35,9 +35,9 @@
         <section class="ultimas-mosaico-board">
             <?php if ($lead): ?>
                 <article class="ultimas-mosaico-lead">
-                    <?php if (!empty($lead['imagem_capa'])): ?>
+                    <?php if (post_cover_desktop_path($lead) !== ''): ?>
                         <a href="<?= e(url('/materia/' . $lead['slug'])) ?>">
-                            <img loading="lazy" src="<?= e(url($lead['imagem_capa'])) ?>" alt="<?= e($lead['titulo']) ?>">
+                            <?= render_post_cover_picture($lead, (string) $lead['titulo']) ?>
                         </a>
                     <?php endif; ?>
                     <div class="card-body">
@@ -52,9 +52,9 @@
             <?php endif; ?>
             <?php if ($side): ?>
                 <article class="ultimas-mosaico-side">
-                    <?php if (!empty($side['imagem_capa'])): ?>
+                    <?php if (post_cover_desktop_path($side) !== ''): ?>
                         <a href="<?= e(url('/materia/' . $side['slug'])) ?>">
-                            <img loading="lazy" src="<?= e(url($side['imagem_capa'])) ?>" alt="<?= e($side['titulo']) ?>">
+                            <?= render_post_cover_picture($side, (string) $side['titulo']) ?>
                         </a>
                     <?php endif; ?>
                     <div class="card-body">
@@ -71,9 +71,9 @@
                 <div class="ultimas-mosaico-stream">
                     <?php foreach ($rest as $post): ?>
                         <article class="ultimas-mosaico-tile">
-                            <?php if (!empty($post['imagem_capa'])): ?>
+                            <?php if (post_cover_desktop_path($post) !== ''): ?>
                                 <a href="<?= e(url('/materia/' . $post['slug'])) ?>">
-                                    <img loading="lazy" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>">
+                                    <?= render_post_cover_picture($post, (string) $post['titulo']) ?>
                                 </a>
                             <?php endif; ?>
                             <div class="card-body">
@@ -93,9 +93,9 @@
         <div class="cards-grid ultimas-grid layout-<?= e((string) $sectionLayout) ?>">
             <?php foreach ($posts as $post): ?>
                 <article class="card">
-                    <?php if (!empty($post['imagem_capa'])): ?>
+                    <?php if (post_cover_desktop_path($post) !== ''): ?>
                         <a href="<?= e(url('/materia/' . $post['slug'])) ?>">
-                            <img loading="lazy" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>">
+                            <?= render_post_cover_picture($post, (string) $post['titulo']) ?>
                         </a>
                     <?php endif; ?>
                     <div class="card-body">

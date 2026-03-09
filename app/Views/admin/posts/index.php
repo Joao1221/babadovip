@@ -75,8 +75,9 @@
         <tr>
             <td><?= (int) $post['id'] ?></td>
             <td>
-                <?php if (!empty($post['imagem_capa'])): ?>
-                    <img class="admin-thumb" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>">
+                <?php $thumbPath = post_cover_desktop_path($post); ?>
+                <?php if ($thumbPath !== ''): ?>
+                    <img class="admin-thumb" src="<?= e(url($thumbPath)) ?>" alt="<?= e($post['titulo']) ?>">
                 <?php else: ?>
                     <span class="muted">-</span>
                 <?php endif; ?>

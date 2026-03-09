@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS posts (
     is_vip TINYINT(1) NOT NULL DEFAULT 0,
     verificacao ENUM('rumor','confirmado') NOT NULL DEFAULT 'rumor',
     imagem_capa VARCHAR(255) NULL,
+    imagem_capa_mobile VARCHAR(255) NULL,
     tags VARCHAR(255) NULL,
     tempo_leitura INT NOT NULL DEFAULT 3,
     view_count INT NOT NULL DEFAULT 0,

@@ -48,6 +48,44 @@ function post_title_color(array $post, string $fallback = '#FFFFFF'): string
     return normalize_hex_color(isset($post['overlay_titulo_cor']) ? (string) $post['overlay_titulo_cor'] : null, $fallback);
 }
 
+function post_cover_desktop_path(array $post): string
+{
+    $desktop = trim((string) ($post['imagem_capa'] ?? ''));
+    if ($desktop !== '') {
+        return $desktop;
+    }
+    return trim((string) ($post['imagem_capa_mobile'] ?? ''));
+}
+
+function post_cover_mobile_path(array $post): string
+{
+    $mobile = trim((string) ($post['imagem_capa_mobile'] ?? ''));
+    if ($mobile !== '') {
+        return $mobile;
+    }
+    return post_cover_desktop_path($post);
+}
+
+function render_post_cover_picture(array $post, string $alt, string $imgClass = '', string $loading = 'lazy'): string
+{
+    $desktop = post_cover_desktop_path($post);
+    if ($desktop === '') {
+        return '';
+    }
+    $mobile = post_cover_mobile_path($post);
+    $loadingValue = in_array($loading, ['lazy', 'eager'], true) ? $loading : 'lazy';
+    $classAttr = trim($imgClass) !== '' ? ' class="' . e(trim($imgClass)) . '"' : '';
+
+    $html = '<picture>';
+    if ($mobile !== '' && $mobile !== $desktop) {
+        $html .= '<source media="(max-width: 900px)" srcset="' . e(url($mobile)) . '">';
+    }
+    $html .= '<img loading="' . e($loadingValue) . '"' . $classAttr . ' src="' . e(url($desktop)) . '" alt="' . e($alt) . '">';
+    $html .= '</picture>';
+
+    return $html;
+}
+
 function url(string $path = ''): string
 {
     return rtrim((string) config('app.url'), '/') . '/' . ltrim($path, '/');

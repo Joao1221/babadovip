@@ -9,6 +9,7 @@ final class PostModel extends BaseModel
 {
     private ?bool $hasOverlayTitleColorColumn = null;
     private ?bool $hasHomeSubheadlinesColumn = null;
+    private ?bool $hasMobileCoverColumn = null;
 
     public function generateUniqueSlug(string $title, ?int $ignoreId = null): string
     {
@@ -45,105 +46,81 @@ final class PostModel extends BaseModel
     {
         $data['overlay_titulo_cor'] = $data['overlay_titulo_cor'] ?? '#FFFFFF';
         $data['subchamadas_home'] = $data['subchamadas_home'] ?? null;
+        $data['imagem_capa_mobile'] = $data['imagem_capa_mobile'] ?? null;
 
-        $hasOverlay = $this->hasOverlayTitleColorColumn();
-        $hasHomeSubheadlines = $this->hasHomeSubheadlinesColumn();
+        $columns = $this->getWritableColumns();
+        $payload = $this->filterPayloadByColumns($data, $columns);
+        $placeholders = array_map(static fn(string $column): string => ':' . $column, $columns);
 
-        if ($hasOverlay && $hasHomeSubheadlines) {
-            $stmt = $this->pdo->prepare('INSERT INTO posts (
-                categoria_id, autor_admin_id, titulo, subtitulo, slug, conteudo_html, status, publicado_em,
-                is_breaking, is_exclusivo, is_vip, verificacao, imagem_capa, tags, tempo_leitura, event_data, event_hora, event_local, event_bairro_cidade, overlay_titulo_cor, subchamadas_home
+        $stmt = $this->pdo->prepare('INSERT INTO posts (
+                ' . implode(', ', $columns) . '
             ) VALUES (
-                :categoria_id, :autor_admin_id, :titulo, :subtitulo, :slug, :conteudo_html, :status, :publicado_em,
-                :is_breaking, :is_exclusivo, :is_vip, :verificacao, :imagem_capa, :tags, :tempo_leitura, :event_data, :event_hora, :event_local, :event_bairro_cidade, :overlay_titulo_cor, :subchamadas_home
+                ' . implode(', ', $placeholders) . '
             )');
-        } elseif ($hasOverlay) {
-            unset($data['subchamadas_home']);
-            $stmt = $this->pdo->prepare('INSERT INTO posts (
-                categoria_id, autor_admin_id, titulo, subtitulo, slug, conteudo_html, status, publicado_em,
-                is_breaking, is_exclusivo, is_vip, verificacao, imagem_capa, tags, tempo_leitura, event_data, event_hora, event_local, event_bairro_cidade, overlay_titulo_cor
-            ) VALUES (
-                :categoria_id, :autor_admin_id, :titulo, :subtitulo, :slug, :conteudo_html, :status, :publicado_em,
-                :is_breaking, :is_exclusivo, :is_vip, :verificacao, :imagem_capa, :tags, :tempo_leitura, :event_data, :event_hora, :event_local, :event_bairro_cidade, :overlay_titulo_cor
-            )');
-        } elseif ($hasHomeSubheadlines) {
-            unset($data['overlay_titulo_cor']);
-            $stmt = $this->pdo->prepare('INSERT INTO posts (
-                categoria_id, autor_admin_id, titulo, subtitulo, slug, conteudo_html, status, publicado_em,
-                is_breaking, is_exclusivo, is_vip, verificacao, imagem_capa, tags, tempo_leitura, event_data, event_hora, event_local, event_bairro_cidade, subchamadas_home
-            ) VALUES (
-                :categoria_id, :autor_admin_id, :titulo, :subtitulo, :slug, :conteudo_html, :status, :publicado_em,
-                :is_breaking, :is_exclusivo, :is_vip, :verificacao, :imagem_capa, :tags, :tempo_leitura, :event_data, :event_hora, :event_local, :event_bairro_cidade, :subchamadas_home
-            )');
-        } else {
-            unset($data['overlay_titulo_cor']);
-            unset($data['subchamadas_home']);
-            $stmt = $this->pdo->prepare('INSERT INTO posts (
-                categoria_id, autor_admin_id, titulo, subtitulo, slug, conteudo_html, status, publicado_em,
-                is_breaking, is_exclusivo, is_vip, verificacao, imagem_capa, tags, tempo_leitura, event_data, event_hora, event_local, event_bairro_cidade
-            ) VALUES (
-                :categoria_id, :autor_admin_id, :titulo, :subtitulo, :slug, :conteudo_html, :status, :publicado_em,
-                :is_breaking, :is_exclusivo, :is_vip, :verificacao, :imagem_capa, :tags, :tempo_leitura, :event_data, :event_hora, :event_local, :event_bairro_cidade
-            )');
-        }
-        $stmt->execute($data);
+        $stmt->execute($payload);
         return (int) $this->pdo->lastInsertId();
     }
 
     public function update(int $id, array $data): void
     {
-        $data['id'] = $id;
         $data['overlay_titulo_cor'] = $data['overlay_titulo_cor'] ?? '#FFFFFF';
         $data['subchamadas_home'] = $data['subchamadas_home'] ?? null;
+        $data['imagem_capa_mobile'] = $data['imagem_capa_mobile'] ?? null;
 
-        $hasOverlay = $this->hasOverlayTitleColorColumn();
-        $hasHomeSubheadlines = $this->hasHomeSubheadlinesColumn();
+        $columns = $this->getWritableColumns();
+        $payload = $this->filterPayloadByColumns($data, $columns);
+        $setParts = array_map(static fn(string $column): string => $column . ' = :' . $column, $columns);
+        $payload['id'] = $id;
 
-        if ($hasOverlay && $hasHomeSubheadlines) {
-            $stmt = $this->pdo->prepare('UPDATE posts SET
-                categoria_id = :categoria_id, autor_admin_id = :autor_admin_id, titulo = :titulo, subtitulo = :subtitulo, slug = :slug,
-                conteudo_html = :conteudo_html, status = :status, publicado_em = :publicado_em,
-                is_breaking = :is_breaking, is_exclusivo = :is_exclusivo, is_vip = :is_vip, verificacao = :verificacao,
-                imagem_capa = :imagem_capa, tags = :tags, tempo_leitura = :tempo_leitura,
-                event_data = :event_data, event_hora = :event_hora, event_local = :event_local, event_bairro_cidade = :event_bairro_cidade,
-                overlay_titulo_cor = :overlay_titulo_cor, subchamadas_home = :subchamadas_home,
+        $stmt = $this->pdo->prepare('UPDATE posts SET
+                ' . implode(', ', $setParts) . ',
                 atualizado_em = NOW()
                 WHERE id = :id');
-        } elseif ($hasOverlay) {
-            unset($data['subchamadas_home']);
-            $stmt = $this->pdo->prepare('UPDATE posts SET
-                categoria_id = :categoria_id, autor_admin_id = :autor_admin_id, titulo = :titulo, subtitulo = :subtitulo, slug = :slug,
-                conteudo_html = :conteudo_html, status = :status, publicado_em = :publicado_em,
-                is_breaking = :is_breaking, is_exclusivo = :is_exclusivo, is_vip = :is_vip, verificacao = :verificacao,
-                imagem_capa = :imagem_capa, tags = :tags, tempo_leitura = :tempo_leitura,
-                event_data = :event_data, event_hora = :event_hora, event_local = :event_local, event_bairro_cidade = :event_bairro_cidade,
-                overlay_titulo_cor = :overlay_titulo_cor,
-                atualizado_em = NOW()
-                WHERE id = :id');
-        } elseif ($hasHomeSubheadlines) {
-            unset($data['overlay_titulo_cor']);
-            $stmt = $this->pdo->prepare('UPDATE posts SET
-                categoria_id = :categoria_id, autor_admin_id = :autor_admin_id, titulo = :titulo, subtitulo = :subtitulo, slug = :slug,
-                conteudo_html = :conteudo_html, status = :status, publicado_em = :publicado_em,
-                is_breaking = :is_breaking, is_exclusivo = :is_exclusivo, is_vip = :is_vip, verificacao = :verificacao,
-                imagem_capa = :imagem_capa, tags = :tags, tempo_leitura = :tempo_leitura,
-                event_data = :event_data, event_hora = :event_hora, event_local = :event_local, event_bairro_cidade = :event_bairro_cidade,
-                subchamadas_home = :subchamadas_home,
-                atualizado_em = NOW()
-                WHERE id = :id');
-        } else {
-            unset($data['overlay_titulo_cor']);
-            unset($data['subchamadas_home']);
-            $stmt = $this->pdo->prepare('UPDATE posts SET
-                categoria_id = :categoria_id, autor_admin_id = :autor_admin_id, titulo = :titulo, subtitulo = :subtitulo, slug = :slug,
-                conteudo_html = :conteudo_html, status = :status, publicado_em = :publicado_em,
-                is_breaking = :is_breaking, is_exclusivo = :is_exclusivo, is_vip = :is_vip, verificacao = :verificacao,
-                imagem_capa = :imagem_capa, tags = :tags, tempo_leitura = :tempo_leitura,
-                event_data = :event_data, event_hora = :event_hora, event_local = :event_local, event_bairro_cidade = :event_bairro_cidade,
-                atualizado_em = NOW()
-                WHERE id = :id');
+        $stmt->execute($payload);
+    }
+
+    private function getWritableColumns(): array
+    {
+        $columns = [
+            'categoria_id',
+            'autor_admin_id',
+            'titulo',
+            'subtitulo',
+            'slug',
+            'conteudo_html',
+            'status',
+            'publicado_em',
+            'is_breaking',
+            'is_exclusivo',
+            'is_vip',
+            'verificacao',
+            'imagem_capa',
+            'tags',
+            'tempo_leitura',
+            'event_data',
+            'event_hora',
+            'event_local',
+            'event_bairro_cidade',
+        ];
+        if ($this->hasOverlayTitleColorColumn()) {
+            $columns[] = 'overlay_titulo_cor';
         }
-        $stmt->execute($data);
+        if ($this->hasHomeSubheadlinesColumn()) {
+            $columns[] = 'subchamadas_home';
+        }
+        if ($this->hasMobileCoverColumn()) {
+            $columns[] = 'imagem_capa_mobile';
+        }
+        return $columns;
+    }
+
+    private function filterPayloadByColumns(array $data, array $columns): array
+    {
+        $payload = [];
+        foreach ($columns as $column) {
+            $payload[$column] = $data[$column] ?? null;
+        }
+        return $payload;
     }
 
     private function hasOverlayTitleColorColumn(): bool
@@ -168,6 +145,18 @@ final class PostModel extends BaseModel
         $stmt->execute();
         $this->hasHomeSubheadlinesColumn = ((int) $stmt->fetchColumn()) > 0;
         return $this->hasHomeSubheadlinesColumn;
+    }
+
+    private function hasMobileCoverColumn(): bool
+    {
+        if ($this->hasMobileCoverColumn !== null) {
+            return $this->hasMobileCoverColumn;
+        }
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM information_schema.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'posts' AND COLUMN_NAME = 'imagem_capa_mobile'");
+        $stmt->execute();
+        $this->hasMobileCoverColumn = ((int) $stmt->fetchColumn()) > 0;
+        return $this->hasMobileCoverColumn;
     }
 
     public function findById(int $id): ?array

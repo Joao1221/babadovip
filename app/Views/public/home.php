@@ -38,12 +38,12 @@
                                     }
                                 }
                             }
-                            $isTextOnlyMain = empty($main['imagem_capa']);
+                            $isTextOnlyMain = post_cover_desktop_path($main) === '';
                         ?>
                         <article class="card card-principal <?= $isTextOnlyMain ? 'card-principal-text' : '' ?>">
-                            <?php if (!$isTextOnlyMain && !empty($main['imagem_capa'])): ?>
+                            <?php if (!$isTextOnlyMain): ?>
                                 <a href="<?= e(url('/materia/' . $main['slug'])) ?>">
-                                    <img loading="lazy" src="<?= e(url($main['imagem_capa'])) ?>" alt="<?= e($main['titulo']) ?>">
+                                    <?= render_post_cover_picture($main, (string) $main['titulo']) ?>
                                 </a>
                             <?php endif; ?>
                             <div class="card-body card-principal-overlay <?= $isTextOnlyMain ? 'card-principal-overlay-text' : '' ?>">
@@ -64,9 +64,9 @@
                         <div class="cards-grid sociedade-second-row">
                             <?php foreach ($secondRow as $post): ?>
                                 <article class="card">
-                                    <?php if (!empty($post['imagem_capa'])): ?>
+                                    <?php if (post_cover_desktop_path($post) !== ''): ?>
                                         <a href="<?= e(url('/materia/' . $post['slug'])) ?>">
-                                            <img loading="lazy" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>">
+                                            <?= render_post_cover_picture($post, (string) $post['titulo']) ?>
                                         </a>
                                     <?php endif; ?>
                                     <div class="card-body">
@@ -106,9 +106,9 @@
                         <div class="ultimas-top-row">
                             <?php foreach ($top as $post): ?>
                                 <article class="card ultimas-top-card">
-                                    <?php if (!empty($post['imagem_capa'])): ?>
+                                    <?php if (post_cover_desktop_path($post) !== ''): ?>
                                         <a href="<?= e(url('/materia/' . $post['slug'])) ?>">
-                                            <img loading="lazy" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>">
+                                            <?= render_post_cover_picture($post, (string) $post['titulo']) ?>
                                         </a>
                                     <?php endif; ?>
                                     <div class="card-body">
@@ -127,9 +127,9 @@
                         <div class="cards-grid ultimas-rest-grid layout-<?= e($sec['layout']) ?>">
                             <?php foreach ($rest as $post): ?>
                                 <article class="card">
-                                    <?php if (!empty($post['imagem_capa'])): ?>
+                                    <?php if (post_cover_desktop_path($post) !== ''): ?>
                                         <a href="<?= e(url('/materia/' . $post['slug'])) ?>">
-                                            <img loading="lazy" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>">
+                                            <?= render_post_cover_picture($post, (string) $post['titulo']) ?>
                                         </a>
                                     <?php endif; ?>
                                     <div class="card-body">
@@ -148,9 +148,9 @@
                     <div class="cards-grid layout-<?= e($sec['layout']) ?>">
                         <?php foreach ($posts as $index => $post): ?>
                             <article class="card <?= $index === 0 ? 'featured' : '' ?>">
-                                <?php if (!empty($post['imagem_capa'])): ?>
+                                <?php if (post_cover_desktop_path($post) !== ''): ?>
                                     <a href="<?= e(url('/materia/' . $post['slug'])) ?>">
-                                        <img loading="lazy" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>">
+                                        <?= render_post_cover_picture($post, (string) $post['titulo']) ?>
                                     </a>
                                 <?php endif; ?>
                                 <div class="card-body">

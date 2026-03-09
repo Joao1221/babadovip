@@ -69,7 +69,8 @@
                 <div class="card-body">
                     <h3>Card #<?= $pos ?></h3>
                     <?php if ($card): ?>
-                        <?php if ($card['imagem_capa']): ?><img src="<?= e(url($card['imagem_capa'])) ?>" alt="<?= e($card['titulo']) ?>"><?php endif; ?>
+                        <?php $cardThumbPath = post_cover_desktop_path($card); ?>
+                        <?php if ($cardThumbPath !== ''): ?><img src="<?= e(url($cardThumbPath)) ?>" alt="<?= e($card['titulo']) ?>"><?php endif; ?>
                         <p><strong><?= e($card['titulo']) ?></strong></p>
                         <p class="muted">ID <?= (int) $card['post_id'] ?> | <?= e((string) $card['categoria_nome']) ?> | <?= e($statusLabels[$card['status']] ?? $card['status']) ?></p>
                         <p class="muted"><?= e($card['slug']) ?></p>

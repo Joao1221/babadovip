@@ -11,9 +11,9 @@
 <div class="cards-grid">
     <?php foreach ($posts as $post): ?>
         <article class="card">
-            <?php if (!empty($post['imagem_capa'])): ?>
+            <?php if (post_cover_desktop_path($post) !== ''): ?>
                 <a href="<?= e(url('/materia/' . $post['slug'])) ?>">
-                    <img loading="lazy" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>">
+                    <?= render_post_cover_picture($post, (string) $post['titulo']) ?>
                 </a>
             <?php endif; ?>
             <div class="card-body">

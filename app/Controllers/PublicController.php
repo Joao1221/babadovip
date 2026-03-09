@@ -92,11 +92,6 @@ final class PublicController extends BaseController
         }
 
         $limit = max(1, (int) ($section['limite_cards'] ?? 1));
-        if (($section['slug'] ?? '') === 'sociedade-festas') {
-            $limit = max($limit, 7);
-        } elseif (($section['slug'] ?? '') === 'eventos-agenda') {
-            $limit = max($limit, 9);
-        }
         $mode = $section['modo'] ?? 'auto';
         $categoryId = (int) ($section['categoria_id'] ?? 0);
         $manualPostIds = array_map(static fn(array $c): int => (int) $c['post_id'], $manualCards);

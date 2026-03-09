@@ -2,8 +2,9 @@
 <?php $selectedCategoryId = (int) ($post['categoria_id'] ?? 0); ?>
 <?php $statusLabels = ['draft' => 'Rascunho', 'published' => 'Publicado', 'scheduled' => 'Agendado']; ?>
 <?php $coverImagePath = (string) ($post['imagem_capa'] ?? ''); ?>
+<?php $mobileCoverImagePath = (string) ($post['imagem_capa_mobile'] ?? ''); ?>
 <section class="section-head">
-    <h1><?= $isEdit ? 'Editar Matéria #' . (int) $post['id'] : 'Nova Matéria' ?></h1>
+    <h1><?= $isEdit ? 'Editar Mat&eacute;ria #' . (int) $post['id'] : 'Nova Mat&eacute;ria' ?></h1>
     <a class="btn-small" href="<?= e(url('/admin/posts')) ?>">Voltar</a>
 </section>
 
@@ -18,14 +19,14 @@
 
 <form method="post" enctype="multipart/form-data" class="grid-form" action="<?= e($isEdit ? url('/admin/posts/' . $post['id'] . '/editar') : url('/admin/posts')) ?>">
     <?= Csrf::field() ?>
-    <label>Título
+    <label>T&iacute;tulo
         <input type="text" name="titulo" maxlength="500" required value="<?= e((string) ($post['titulo'] ?? '')) ?>">
         <small class="muted">Para quebrar linha no titulo exibido, use &lt;br&gt;.</small>
     </label>
     <label>Slug
         <input type="text" name="slug" maxlength="190" value="<?= e((string) ($post['slug'] ?? '')) ?>">
     </label>
-    <label>Subtítulo/Lead
+    <label>Subt&iacute;tulo/Lead
         <input type="text" name="subtitulo" maxlength="255" value="<?= e((string) ($post['subtitulo'] ?? '')) ?>">
     </label>
     <label class="full">Subchamadas da chamada principal (ate 5, uma por linha)
@@ -50,10 +51,10 @@
     <label>Publicado em
         <input type="datetime-local" name="publicado_em" value="<?= !empty($post['publicado_em']) ? e(date('Y-m-d\TH:i', strtotime((string) $post['publicado_em']))) : '' ?>">
     </label>
-    <label>Tags (csv)
+    <label>T&iacute;tulo
         <input type="text" name="tags" value="<?= e((string) ($post['tags'] ?? '')) ?>">
     </label>
-    <label>Tempo leitura (min)
+    <label>T&iacute;tulo
         <input type="number" min="1" max="90" name="tempo_leitura" value="<?= (int) ($post['tempo_leitura'] ?? 3) ?>">
     </label>
     <label>Veracidade
@@ -62,7 +63,7 @@
             <option value="confirmado" <?= ($post['verificacao'] ?? 'rumor') === 'confirmado' ? 'selected' : '' ?>>Confirmado</option>
         </select>
     </label>
-    <label>Cor do título da chamada principal
+    <label>Cor do t&iacute;tulo da chamada principal
         <input type="color" name="overlay_titulo_cor" value="<?= e((string) ($post['overlay_titulo_cor'] ?? '#FFFFFF')) ?>">
     </label>
     <fieldset class="full feature-flags">
@@ -99,45 +100,69 @@
     <label>Evento - Local<input type="text" name="event_local" value="<?= e((string) ($post['event_local'] ?? '')) ?>"></label>
     <label>Evento - Bairro/Cidade<input type="text" name="event_bairro_cidade" value="<?= e((string) ($post['event_bairro_cidade'] ?? '')) ?>"></label>
 
-    <label class="full">Conteúdo
+    <label class="full">Conte&uacute;do
         <textarea name="conteudo_html" rows="14" required><?= e((string) ($post['conteudo_html'] ?? '')) ?></textarea>
     </label>
 
-    <label class="full">Imagem de capa
+    <label class="full">Imagem de capa (PC/Desktop)
         <input type="file" name="imagem_capa" accept=".jpg,.jpeg,.png,.webp,.avif">
     </label>
     <?php if ($coverImagePath !== ''): ?>
     <label class="full check">
         <input type="checkbox" name="remover_imagem_capa" value="1" id="removerImagemCapa">
-        <span>Remover imagem de capa atual</span>
+        <span>Remover imagem de capa desktop atual</span>
     </label>
     <?php endif; ?>
     <div class="full">
         <div
-            id="coverPreviewCard"
+            id="coverPreviewCardDesktop"
             class="cover-preview-card <?= $coverImagePath === '' ? 'is-hidden' : '' ?>"
             <?= $coverImagePath !== '' ? 'data-original-src="' . e(url($coverImagePath)) . '"' : '' ?>
         >
             <img
-                id="coverPreviewImage"
+                id="coverPreviewImageDesktop"
                 class="preview-cover"
                 src="<?= $coverImagePath !== '' ? e(url($coverImagePath)) : '' ?>"
-                alt="Prévia da capa"
+                alt="Preview da capa desktop"
             >
-            <small class="muted">Prévia da imagem de capa (sem comentário).</small>
+            <small class="muted">Previa da imagem de capa desktop (sem comentario).</small>
         </div>
     </div>
 
+    <label class="full">Imagem de capa (Mobile)
+        <input type="file" name="imagem_capa_mobile" accept=".jpg,.jpeg,.png,.webp,.avif">
+    </label>
+    <?php if ($mobileCoverImagePath !== ''): ?>
+    <label class="full check">
+        <input type="checkbox" name="remover_imagem_capa_mobile" value="1" id="removerImagemCapaMobile">
+        <span>Remover imagem de capa mobile atual</span>
+    </label>
+    <?php endif; ?>
     <div class="full">
-        <h3>Galeria (até 20)</h3>
-        <p class="muted">Ao selecionar arquivos, os cards com foto aparecem abaixo para adicionar comentário e ordenar.</p>
+        <div
+            id="coverPreviewCardMobile"
+            class="cover-preview-card <?= $mobileCoverImagePath === '' ? 'is-hidden' : '' ?>"
+            <?= $mobileCoverImagePath !== '' ? 'data-original-src="' . e(url($mobileCoverImagePath)) . '"' : '' ?>
+        >
+            <img
+                id="coverPreviewImageMobile"
+                class="preview-cover"
+                src="<?= $mobileCoverImagePath !== '' ? e(url($mobileCoverImagePath)) : '' ?>"
+                alt="Preview da capa mobile"
+            >
+            <small class="muted">Previa da imagem de capa mobile (sem comentario).</small>
+        </div>
+    </div>
+    <div class="full">
+        <h3>Galeria (at&eacute; 20)</h3>
+        <p class="muted">Ao selecionar arquivos, os cards com foto aparecem abaixo para adicionar coment&aacute;rio e ordenar.</p>
         <div id="galleryList" class="admin-gallery-sort">
             <?php foreach ($photos as $i => $photo): ?>
                 <div class="admin-gallery-item" draggable="true">
                     <img src="<?= e(url($photo['arquivo'])) ?>" alt="">
                     <input type="hidden" name="existing_fotos[]" value="<?= e($photo['arquivo']) ?>">
                     <input type="hidden" name="existing_ordens[]" value="<?= (int) ($photo['ordem'] ?? $i) ?>" class="ordem-input">
-                    <input type="text" name="existing_legendas[]" placeholder="Comentário da foto" value="<?= e((string) $photo['legenda']) ?>">
+                    <input type="text" name="existing_legendas[]" placeholder="Coment&aacute;rio da foto" value="<?= e((string) $photo['legenda']) ?>">
                     <button type="button" class="btn-danger remove-item">Remover</button>
                 </div>
             <?php endforeach; ?>
@@ -145,5 +170,5 @@
         <input type="file" id="galleryFiles" name="fotos[]" accept=".jpg,.jpeg,.png,.webp,.avif" multiple data-max-files="20" data-gallery-managed="1">
         <small class="muted">Ordene arrastando os cards.</small>
     </div>
-    <button type="submit" class="btn-primary full">Salvar Matéria</button>
+    <button type="submit" class="btn-primary full">Salvar Mat&eacute;ria</button>
 </form>

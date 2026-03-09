@@ -62,7 +62,7 @@ if ($isQuickGossip && (string) ($post['subtitulo'] ?? '') !== '') {
         </div>
         <h1 style="color: <?= e(post_title_color($post)) ?>;"><?= e_with_br($post['titulo']) ?></h1>
         <?php if (!$isQuickGossip && $post['subtitulo']): ?><p class="lead"><?= e($post['subtitulo']) ?></p><?php endif; ?>
-        <?php if ($post['imagem_capa']): ?><img class="cover" src="<?= e(url($post['imagem_capa'])) ?>" alt="<?= e($post['titulo']) ?>"><?php endif; ?>
+        <?= render_post_cover_picture($post, (string) $post['titulo'], 'cover', 'eager') ?>
     </header>
     <?php if (trim(strip_tags($postContentHtml)) !== ''): ?>
     <section class="post-content"><?= $postContentHtml ?></section>

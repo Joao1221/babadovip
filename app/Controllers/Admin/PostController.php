@@ -145,11 +145,23 @@ final class PostController extends BaseController
         if ($removeCover) {
             $coverPath = null;
         }
+        $removeMobileCover = isset($_POST['remover_imagem_capa_mobile']) && (string) $_POST['remover_imagem_capa_mobile'] === '1';
+        $mobileCoverPath = $existingPost['imagem_capa_mobile'] ?? null;
+        if ($removeMobileCover) {
+            $mobileCoverPath = null;
+        }
         if (isset($_FILES['imagem_capa']) && ($_FILES['imagem_capa']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
-            $tmpFolder = PUBLIC_PATH . '/uploads/tmp/capa-' . date('YmdHis') . '-' . bin2hex(random_bytes(3));
+            $tmpFolder = PUBLIC_PATH . '/uploads/tmp/capa-desktop-' . date('YmdHis') . '-' . bin2hex(random_bytes(3));
             $saved = $uploadService->processMultiple($_FILES['imagem_capa'], $tmpFolder, 1);
             if ($saved) {
                 $coverPath = str_replace('\\', '/', str_replace(PUBLIC_PATH . '/', '', $saved[0]['full_path']));
+            }
+        }
+        if (isset($_FILES['imagem_capa_mobile']) && ($_FILES['imagem_capa_mobile']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+            $tmpFolder = PUBLIC_PATH . '/uploads/tmp/capa-mobile-' . date('YmdHis') . '-' . bin2hex(random_bytes(3));
+            $saved = $uploadService->processMultiple($_FILES['imagem_capa_mobile'], $tmpFolder, 1);
+            if ($saved) {
+                $mobileCoverPath = str_replace('\\', '/', str_replace(PUBLIC_PATH . '/', '', $saved[0]['full_path']));
             }
         }
 
@@ -167,6 +179,7 @@ final class PostController extends BaseController
             'is_vip' => isset($_POST['is_vip']) ? 1 : 0,
             'verificacao' => in_array($_POST['verificacao'] ?? 'rumor', ['rumor', 'confirmado'], true) ? $_POST['verificacao'] : 'rumor',
             'imagem_capa' => $coverPath,
+            'imagem_capa_mobile' => $mobileCoverPath,
             'tags' => trim((string) ($_POST['tags'] ?? '')) ?: null,
             'tempo_leitura' => (int) ($_POST['tempo_leitura'] ?? 3),
             'event_data' => trim((string) ($_POST['event_data'] ?? '')) ?: null,
@@ -195,23 +208,53 @@ final class PostController extends BaseController
         }
         $photoModel->replaceForPost($postId, $gallery);
 
-        if ($coverPath && str_contains($coverPath, 'uploads/tmp/')) {
-            $finalDir = PUBLIC_PATH . '/uploads/posts/' . date('Y/m') . '/post-' . $postId . '/capa';
-            if (!is_dir($finalDir)) {
-                mkdir($finalDir, 0775, true);
-            }
-            $source = PUBLIC_PATH . '/' . $coverPath;
-            $final = $finalDir . '/' . basename($source);
-            @rename($source, $final);
-            $social = dirname($final) . '/social-' . pathinfo($final, PATHINFO_FILENAME) . '.jpg';
-            $uploadService->createThumbnail($final, $social, 1200);
+        $finalCoverPath = $this->finalizeCoverImage($coverPath, $postId, 'capa');
+        if ($finalCoverPath !== '' && $finalCoverPath !== null) {
+            $finalCoverAbsolute = PUBLIC_PATH . '/' . ltrim($finalCoverPath, '/');
+            $social = dirname($finalCoverAbsolute) . '/social-' . pathinfo($finalCoverAbsolute, PATHINFO_FILENAME) . '.jpg';
+            $uploadService->createThumbnail($finalCoverAbsolute, $social, 1200);
+        }
+        $finalMobileCoverPath = $this->finalizeCoverImage($mobileCoverPath, $postId, 'capa-mobile');
+        if ($finalCoverPath !== $coverPath || $finalMobileCoverPath !== $mobileCoverPath) {
             $postModel->update($postId, array_merge($data, [
-                'imagem_capa' => str_replace('\\', '/', str_replace(PUBLIC_PATH . '/', '', $final)),
+                'imagem_capa' => $finalCoverPath,
+                'imagem_capa_mobile' => $finalMobileCoverPath,
             ]));
         }
 
         Flash::set('success', 'Materia salva com sucesso.');
         redirect('/admin/posts/' . $postId . '/editar');
+    }
+
+    private function finalizeCoverImage(?string $coverPath, int $postId, string $folderName): ?string
+    {
+        $coverPath = trim((string) $coverPath);
+        if ($coverPath === '') {
+            return null;
+        }
+        if (!str_contains($coverPath, 'uploads/tmp/')) {
+            return $coverPath;
+        }
+
+        $source = PUBLIC_PATH . '/' . ltrim($coverPath, '/');
+        if (!is_file($source)) {
+            return null;
+        }
+
+        $finalDir = PUBLIC_PATH . '/uploads/posts/' . date('Y/m') . '/post-' . $postId . '/' . $folderName;
+        if (!is_dir($finalDir)) {
+            mkdir($finalDir, 0775, true);
+        }
+        $final = $finalDir . '/' . basename($source);
+        @rename($source, $final);
+        if (!is_file($final) && is_file($source)) {
+            @copy($source, $final);
+        }
+        if (!is_file($final)) {
+            return null;
+        }
+
+        return str_replace('\\', '/', str_replace(PUBLIC_PATH . '/', '', $final));
     }
 
     private function collectGallery(int $postId, UploadService $uploadService): array
@@ -300,6 +343,7 @@ final class PostController extends BaseController
             'is_vip' => (int) $post['is_vip'],
             'verificacao' => $post['verificacao'],
             'imagem_capa' => $post['imagem_capa'],
+            'imagem_capa_mobile' => $post['imagem_capa_mobile'] ?? null,
             'tags' => $post['tags'],
             'tempo_leitura' => (int) $post['tempo_leitura'],
             'event_data' => $post['event_data'],

@@ -125,6 +125,12 @@ a { color: inherit; text-decoration: none; }
 .card.card-principal { min-height: 500px; margin-bottom: 50px; }
 .card.card-principal img { height: 500px; }
 .card.card-principal { position: relative; }
+@media (min-width: 901px) {
+  .home-page-grid .card img,
+  .post-page .cover {
+    object-position: top center !important;
+  }
+}
 .card-principal-overlay {
   position: absolute;
   left: 0;

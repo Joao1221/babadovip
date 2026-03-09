@@ -248,11 +248,15 @@
     });
   });
 
-  const coverInput = document.querySelector('input[type="file"][name="imagem_capa"]');
-  const coverCard = document.getElementById("coverPreviewCard");
-  const coverImage = document.getElementById("coverPreviewImage");
-  const removeCoverCheckbox = document.getElementById("removerImagemCapa");
-  if (coverInput && coverCard && coverImage) {
+  const initCoverPreview = ({ inputName, cardId, imageId, removeCheckboxId }) => {
+    const coverInput = document.querySelector(`input[type="file"][name="${inputName}"]`);
+    const coverCard = document.getElementById(cardId);
+    const coverImage = document.getElementById(imageId);
+    const removeCoverCheckbox = removeCheckboxId ? document.getElementById(removeCheckboxId) : null;
+    if (!coverInput || !coverCard || !coverImage) {
+      return;
+    }
+
     const syncCoverPreview = () => {
       const file = (coverInput.files || [])[0];
       if (file) {
@@ -290,7 +294,20 @@
         syncCoverPreview();
       });
     }
-  }
+  };
+
+  initCoverPreview({
+    inputName: "imagem_capa",
+    cardId: "coverPreviewCardDesktop",
+    imageId: "coverPreviewImageDesktop",
+    removeCheckboxId: "removerImagemCapa",
+  });
+  initCoverPreview({
+    inputName: "imagem_capa_mobile",
+    cardId: "coverPreviewCardMobile",
+    imageId: "coverPreviewImageMobile",
+    removeCheckboxId: "removerImagemCapaMobile",
+  });
 
   const galleryList = document.getElementById("galleryList");
   if (galleryList) {

@@ -7,14 +7,16 @@ final class HomeCardModel extends BaseModel
 {
     private ?bool $hasOverlayTitleColorColumn = null;
     private ?bool $hasHomeSubheadlinesColumn = null;
+    private ?bool $hasMobileCoverColumn = null;
 
     public function listBySection(int $sectionId, bool $onlyPublic = false): array
     {
         $overlaySelect = $this->hasOverlayTitleColorColumn() ? 'p.overlay_titulo_cor' : "'#FFFFFF' AS overlay_titulo_cor";
         $subheadlinesSelect = $this->hasHomeSubheadlinesColumn() ? 'p.subchamadas_home' : 'NULL AS subchamadas_home';
+        $mobileCoverSelect = $this->hasMobileCoverColumn() ? 'p.imagem_capa_mobile' : 'NULL AS imagem_capa_mobile';
 
         $sql = "SELECT hc.*, p.titulo, p.subtitulo, p.slug, p.status, p.imagem_capa, p.criado_em, p.publicado_em,
-                p.event_local, p.event_bairro_cidade, {$overlaySelect}, {$subheadlinesSelect}, c.nome categoria_nome
+                p.event_local, p.event_bairro_cidade, {$overlaySelect}, {$subheadlinesSelect}, {$mobileCoverSelect}, c.nome categoria_nome
             FROM home_cards hc
             INNER JOIN posts p ON p.id = hc.post_id
             LEFT JOIN categorias c ON c.id = p.categoria_id
@@ -80,5 +82,17 @@ final class HomeCardModel extends BaseModel
         $stmt->execute();
         $this->hasHomeSubheadlinesColumn = ((int) $stmt->fetchColumn()) > 0;
         return $this->hasHomeSubheadlinesColumn;
+    }
+
+    private function hasMobileCoverColumn(): bool
+    {
+        if ($this->hasMobileCoverColumn !== null) {
+            return $this->hasMobileCoverColumn;
+        }
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM information_schema.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'posts' AND COLUMN_NAME = 'imagem_capa_mobile'");
+        $stmt->execute();
+        $this->hasMobileCoverColumn = ((int) $stmt->fetchColumn()) > 0;
+        return $this->hasMobileCoverColumn;
     }
 }
